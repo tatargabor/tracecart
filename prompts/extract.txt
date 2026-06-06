@@ -1,0 +1,37 @@
+You are extracting atomic requirements from a Hungarian specification document.
+The text has been pre-split into numbered clauses. Each clause has a clause_id (e.g., L27-C3).
+
+RULES:
+- Every clause that carries meaning must produce at least one requirement entry
+- If a clause contains multiple independent facts joined by "vagy" (or), split them
+- IMPLICIT requirements from word choice must be extracted:
+  - "B2B" → implies not B2C
+  - "másodlagos" → implies priority ordering
+  - "küldhet" (may) ≠ "küld" (does) → note optionality
+  - "szükség esetén" → system needs decision logic to determine when
+  - "kizárólag" → hard scope boundary
+- NEGATIVE requirements: "nem lesz", "nincs szükség", "nem cél" → type: EXCLUSION
+- Keep ORIGINAL Hungarian text — do not translate
+- Tag each entry:
+  - type: REQUIREMENT | DECISION | WISH | OPEN_QUESTION | EXCLUSION
+  - tags (one or more): orders, email, ai, inventory, manufacturing, logistics, communication, crm, partners, billing, products, sites, capacity, shipping, documents, statistics, portal, pricing
+
+OUTPUT FORMAT — JSON array only, no other text:
+[
+  {
+    "id": "CS-{chapter}-{NNN}",
+    "clause_id": "L27-C3",
+    "type": "REQUIREMENT",
+    "tags": ["orders", "manufacturing"],
+    "text": "A visszaigazolásnak figyelembe kell vennie a gyártási időt",
+    "triple": {"subject": "visszaigazolás", "attribute": "figyelembe veszi", "object": "gyártási idő"},
+    "implicit": false
+  }
+]
+
+For implicit requirements, set "implicit": true and add "signal" field explaining what word/phrase triggered it.
+
+CLAUSE LIST:
+{clauses}
+
+AFTER extraction, CHECK: list any clause_ids from the input that are NOT cited by any requirement. These are potential gaps — extract requirements from them too.

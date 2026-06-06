@@ -1,0 +1,34 @@
+You are verifying specification coverage.
+
+For EACH requirement below, check if the spec sections address it:
+
+Status options:
+- COVERED: the spec FULLY addresses this specific point. Cite spec file + section.
+- PARTIAL: the spec addresses part but misses something. Explain what's missing.
+- MISSING: not addressed in the specs AND not in the scope exclusions.
+- DEFERRED: the topic is explicitly in the scope exclusions list (M2+).
+- N/A: meta-statement or framing decision that doesn't need implementable spec coverage.
+
+STRICT RULES:
+- COVERED requires the spec to address the SPECIFIC point, not just mention the topic area
+- Check modal verbs: if requirement says "küldhet" (may) but spec says "küld" (does) → PARTIAL
+- EXCLUSION-type requirements are scope boundaries — check if specs ALSO state this boundary
+
+SCOPE EXCLUSIONS (M2+):
+{exclusions}
+
+REQUIREMENTS TO CHECK:
+{requirements}
+
+SPEC SECTIONS:
+{specs}
+
+OUTPUT — JSON array only:
+[
+  {
+    "sentence_id": "CS-9-001",
+    "status": "COVERED",
+    "spec_ref": "01-order-intake.md §2.1",
+    "notes": ""
+  }
+]

@@ -1,0 +1,76 @@
+/* set-trace: Coverage annotation callout styles */
+
+/* Covered — green */
+.callout[data-callout="trace-covered"] {
+  --callout-color: 34, 197, 94;
+  --callout-icon: lucide-check-circle;
+  background-color: rgba(34, 197, 94, 0.08);
+  border-left-color: rgb(34, 197, 94);
+}
+
+/* Partial — amber */
+.callout[data-callout="trace-partial"] {
+  --callout-color: 245, 158, 11;
+  --callout-icon: lucide-alert-triangle;
+  background-color: rgba(245, 158, 11, 0.08);
+  border-left-color: rgb(245, 158, 11);
+}
+
+/* Missing — red */
+.callout[data-callout="trace-missing"] {
+  --callout-color: 239, 68, 68;
+  --callout-icon: lucide-x-circle;
+  background-color: rgba(239, 68, 68, 0.08);
+  border-left-color: rgb(239, 68, 68);
+}
+
+/* Deferred — blue */
+.callout[data-callout="trace-deferred"] {
+  --callout-color: 59, 130, 246;
+  --callout-icon: lucide-clock;
+  background-color: rgba(59, 130, 246, 0.06);
+  border-left-color: rgb(59, 130, 246);
+}
+
+/* Superseded — grey with strikethrough */
+.callout[data-callout="trace-superseded"] {
+  --callout-color: 156, 163, 175;
+  --callout-icon: lucide-arrow-right;
+  background-color: rgba(156, 163, 175, 0.06);
+  border-left-color: rgb(156, 163, 175);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Conflict — orange */
+.callout[data-callout="trace-conflict"] {
+  --callout-color: 249, 115, 22;
+  --callout-icon: lucide-zap;
+  background-color: rgba(249, 115, 22, 0.1);
+  border-left-color: rgb(249, 115, 22);
+}
+
+/* N/A — dim */
+.callout[data-callout="trace-na"] {
+  --callout-color: 156, 163, 175;
+  --callout-icon: lucide-minus-circle;
+  background-color: rgba(156, 163, 175, 0.04);
+  border-left-color: rgb(156, 163, 175);
+  opacity: 0.6;
+}
+
+/* Compact callout styling for trace annotations */
+.callout[data-callout^="trace-"] {
+  padding: 4px 8px;
+  margin: 2px 0 8px 0;
+  font-size: 0.85em;
+}
+
+.callout[data-callout^="trace-"] .callout-title {
+  display: none;
+}
+
+.callout[data-callout^="trace-"] code {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
