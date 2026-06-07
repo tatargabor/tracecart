@@ -57,7 +57,7 @@ Each ground-truth entry specifies:
 ```bash
 # Score a method result against ground truth
 # (requires benchmark/ directory with ground-truth data)
-set-trace score benchmark/ground-truth.json benchmark/method-g.json
+tracecart score benchmark/ground-truth.json benchmark/method-g.json
 ```
 
 > Note: The benchmark scoring command is planned but not yet implemented in the TypeScript version. The Python benchmark scripts are preserved in git history.

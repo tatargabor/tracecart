@@ -1,6 +1,6 @@
 ## Context
 
-set-trace has individual Python scripts for clause splitting, document parsing, and input discovery, plus a benchmark framework. The DESIGN.md captures the full architectural vision. This change implements the minimum viable pipeline: source documents in, trace-map.json out.
+tracecart has individual Python scripts for clause splitting, document parsing, and input discovery, plus a benchmark framework. The DESIGN.md captures the full architectural vision. This change implements the minimum viable pipeline: source documents in, trace-map.json out.
 
 The runtime is Claude Code — LLM calls happen via subagents, deterministic logic runs as Python scripts invoked from the agent. No external SDK dependencies.
 

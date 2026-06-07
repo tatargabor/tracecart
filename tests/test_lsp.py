@@ -88,7 +88,7 @@ def test_diagnostics_reverse_traces():
     ls = make_server('test1')
     diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test1/target.md")
 
-    reverse_diags = [d for d in diags if d.source == "set-trace-reverse"]
+    reverse_diags = [d for d in diags if d.source == "tracecart-reverse"]
     assert len(reverse_diags) == 1, f"Expected 1 reverse diag (PARTIAL_SOURCE), got {len(reverse_diags)}"
 
     rd = reverse_diags[0]
@@ -144,7 +144,7 @@ def test_code_lens():
 
     assert len(lenses) > 0, "Should produce code lenses"
     for lens in lenses:
-        assert '[set-trace]' in lens.command.title
+        assert '[tracecart]' in lens.command.title
         assert 'traces:' in lens.command.title
 
     total_traces = sum(

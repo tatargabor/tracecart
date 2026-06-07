@@ -4,7 +4,7 @@
 The LSP server SHALL detect when trace-map.json is modified on disk and automatically re-read it and update diagnostics for all open files.
 
 #### Scenario: Pipeline re-run updates editor
-- **WHEN** the user re-runs the set-trace pipeline and trace-map.json is updated
+- **WHEN** the user re-runs the tracecart pipeline and trace-map.json is updated
 - **THEN** within 3 seconds, the editor diagnostics reflect the new coverage data
 
 ### Requirement: Polling-based detection

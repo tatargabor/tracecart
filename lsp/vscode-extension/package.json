@@ -1,6 +1,6 @@
 {
-  "name": "set-trace-lsp",
-  "displayName": "set-trace",
+  "name": "tracecart-lsp",
+  "displayName": "tracecart",
   "description": "Claim traceability visualization for source documents",
   "version": "0.3.0",
   "engines": { "vscode": "^1.75.0" },
@@ -9,9 +9,9 @@
   "main": "./extension.js",
   "contributes": {
     "configuration": {
-      "title": "set-trace",
+      "title": "tracecart",
       "properties": {
-        "set-trace.pythonPath": {
+        "tracecart.pythonPath": {
           "type": "string",
           "default": "python3",
           "description": "Path to python3 with pygls installed"
@@ -20,25 +20,25 @@
     },
     "commands": [
       {
-        "command": "set-trace.toggleVisualization",
-        "title": "set-trace: Toggle Visualization"
+        "command": "tracecart.toggleVisualization",
+        "title": "tracecart: Toggle Visualization"
       },
       {
-        "command": "set-trace.toggleCovered",
-        "title": "set-trace: Toggle Covered"
+        "command": "tracecart.toggleCovered",
+        "title": "tracecart: Toggle Covered"
       },
       {
-        "command": "set-trace.toggleDirection",
-        "title": "set-trace: Toggle Direction"
+        "command": "tracecart.toggleDirection",
+        "title": "tracecart: Toggle Direction"
       },
       {
-        "command": "set-trace.selectSession",
-        "title": "set-trace: Select Session"
+        "command": "tracecart.selectSession",
+        "title": "tracecart: Select Session"
       }
     ],
     "keybindings": [
       {
-        "command": "set-trace.toggleVisualization",
+        "command": "tracecart.toggleVisualization",
         "key": "ctrl+shift+t",
         "mac": "cmd+shift+t"
       }

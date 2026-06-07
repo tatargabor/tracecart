@@ -15,11 +15,11 @@ A preset file SHALL be a JSON file with the following required fields: `name` (s
 The package SHALL ship with a `spec-coverage` preset that reproduces the current hardcoded behavior: trace types REQUIREMENT/DECISION/WISH/OPEN_QUESTION/EXCLUSION, coverage statuses COVERED/PARTIAL/MISSING/DEFERRED/N/A.
 
 #### Scenario: No --preset flag
-- **WHEN** user runs `set-trace split source.md` without `--preset`
+- **WHEN** user runs `tracecart split source.md` without `--preset`
 - **THEN** the CLI uses the `spec-coverage` preset
 
 #### Scenario: Explicit default
-- **WHEN** user runs `set-trace split source.md --preset spec-coverage`
+- **WHEN** user runs `tracecart split source.md --preset spec-coverage`
 - **THEN** behavior is identical to omitting `--preset`
 
 ### Requirement: Preset discovery
@@ -42,7 +42,7 @@ Prompt templates SHALL be resolved from the preset's `prompts` mapping. Template
 
 #### Scenario: Extract prompt resolution
 - **WHEN** preset has `"prompts": {"extract": "extract.txt"}`
-- **THEN** `set-trace extract-prompt` loads `<pkg>/prompts/extract.txt`
+- **THEN** `tracecart extract-prompt` loads `<pkg>/prompts/extract.txt`
 
 ### Requirement: Prompt templates parameterized by preset vocabulary
 Prompt templates SHALL use `{trace_types}` and `{coverage_statuses}` placeholders that are filled from the active preset's configuration.

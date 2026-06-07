@@ -29,8 +29,8 @@ function printUsage(): void {
     'finalize', 'status', 'delta',
     'presets', 'init', 'update',
   ];
-  process.stderr.write(`set-trace v${getVersion()} — claim traceability tool\n\n`);
-  process.stderr.write(`Usage: set-trace <command> [--preset <name>] [args...]\n\n`);
+  process.stderr.write(`tracecart v${getVersion()} — claim traceability tool\n\n`);
+  process.stderr.write(`Usage: tracecart <command> [--preset <name>] [args...]\n\n`);
   process.stderr.write(`Commands:\n`);
   for (const c of cmds) {
     process.stderr.write(`  ${c}\n`);

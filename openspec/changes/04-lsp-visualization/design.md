@@ -30,8 +30,8 @@ Zed uses a `extension.toml` manifest to register language servers. Our extension
 - Points to `lsp/server.py` as the server binary
 
 ```toml
-[language_servers.set-trace]
-name = "set-trace"
+[language_servers.tracecart]
+name = "tracecart"
 language = "Markdown"
 ```
 
@@ -60,7 +60,7 @@ COVERED traces get Hint severity (visible but not distracting). N/A traces produ
 
 Above each section header in source documents:
 ```
-[set-trace] 8 traces: 5 ✓  2 ⚠  1 ✗
+[tracecart] 8 traces: 5 ✓  2 ⚠  1 ✗
 ```
 
 This requires aggregating traces per source file section. The LSP server groups traces by their source line ranges and the nearest preceding header.

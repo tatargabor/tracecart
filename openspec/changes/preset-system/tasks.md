@@ -25,14 +25,14 @@
 - [x] 4.4 Update `src/commands/reverse-match-prompt.ts` — use preset for prompt template resolution
 - [x] 4.5 Update `src/commands/extract-validate.ts` — validate trace types against preset
 - [x] 4.6 Update `src/commands/match-validate.ts` — validate coverage statuses against preset
-- [x] 4.7 Add `set-trace presets` subcommand — lists available presets with descriptions
+- [x] 4.7 Add `tracecart presets` subcommand — lists available presets with descriptions
 
 ## 5. Update command markdown
 
 - [x] 5.1 Update `templates/claude/commands/set/trace.md` — add `--preset` to all CLI calls, parse preset from arguments
 - [x] 5.2 Add help section to command markdown — explain presets, list built-ins, how to create custom
-- [x] 5.3 Bump version comment to `<!-- set-trace v0.2.0 -->`
-- [x] 5.4 Run `set-trace update` to refresh the project's command markdown
+- [x] 5.3 Bump version comment to `<!-- tracecart v0.2.0 -->`
+- [x] 5.4 Run `tracecart update` to refresh the project's command markdown
 
 ## 6. Archive cleanup
 
@@ -42,5 +42,5 @@
 
 ## 7. End-to-end test
 
-- [x] 7.1 Run `/set:trace tests/fixtures/test1/source.md tests/fixtures/test1/target.md` with spec-coverage preset — verify same results as before
-- [x] 7.2 Verify `set-trace presets` lists spec-coverage with description
+- [x] 7.1 Run `/tracecart tests/fixtures/test1/source.md tests/fixtures/test1/target.md` with spec-coverage preset — verify same results as before
+- [x] 7.2 Verify `tracecart presets` lists spec-coverage with description

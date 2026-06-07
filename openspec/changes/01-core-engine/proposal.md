@@ -1,10 +1,10 @@
 ## Why
 
-set-trace currently has individual Python scripts for parsing and a benchmark framework, but no end-to-end pipeline that takes source documents and target documents and produces a coverage report. Without this core pipeline, nothing else (benchmarks, LSP visualization, agent integration) can be built on top.
+tracecart currently has individual Python scripts for parsing and a benchmark framework, but no end-to-end pipeline that takes source documents and target documents and produces a coverage report. Without this core pipeline, nothing else (benchmarks, LSP visualization, agent integration) can be built on top.
 
 ## Context & Key Decisions
 
-### What set-trace is
+### What tracecart is
 
 A tool that answers: "Given a pile of meetings, emails, and specs that evolved over time — does the final document contain everything, miss nothing, and correctly reflect the latest decisions?"
 
@@ -16,7 +16,7 @@ Two corpora:
 
 The atomic unit is called a **trace** — a traceable path from where something was said (source) to where it should be covered (target). Not "claim" (too legal/adversarial), not "requirement" (too narrow — traces include decisions, exclusions, wishes). Types: REQUIREMENT | DECISION | WISH | OPEN_QUESTION | EXCLUSION.
 
-The project name `set-trace` = "set of traces."
+The project name `tracecart` = "set of traces."
 
 ### Two-layer architecture
 
@@ -92,10 +92,10 @@ This is v1: no topic clustering, no temporal override detection. Flat matching, 
 ## Use Cases This Enables
 
 ### Primary: Specification verification feedback loop
-An agent writes a spec based on input requirements. set-trace runs source (requirements) vs. target (written spec), reports gaps. Agent iterates until 100% coverage. This is a **live feedback loop** the agent calls during writing, not a post-hoc audit.
+An agent writes a spec based on input requirements. tracecart runs source (requirements) vs. target (written spec), reports gaps. Agent iterates until 100% coverage. This is a **live feedback loop** the agent calls during writing, not a post-hoc audit.
 
 ### Agent-as-user integration
-set-trace is designed to be called by other agents, not just humans. The trace-map.json output is machine-readable — an agent reads it, finds MISSING traces, and fixes them.
+tracecart is designed to be called by other agents, not just humans. The trace-map.json output is machine-readable — an agent reads it, finds MISSING traces, and fixes them.
 
 ### Other use cases
 Contract audit (amendments → final), compliance (regulations → policies), decision tracking (meeting notes → decision log), translation QA (original → translation), handover audit.

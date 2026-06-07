@@ -4,7 +4,7 @@ import { buildTraceMap } from '../output/trace-map.js';
 
 export async function cmdFinalize(args: string[]): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace finalize <traces.json> <matches.json> --source <file> --target <file> [--output trace-map.json]\n');
+    process.stderr.write('Usage: tracecart finalize <traces.json> <matches.json> --source <file> --target <file> [--output trace-map.json]\n');
     process.exit(1);
   }
 

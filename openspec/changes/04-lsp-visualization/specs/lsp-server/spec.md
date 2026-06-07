@@ -38,7 +38,7 @@ The LSP server SHALL display a code lens above section headers showing trace cov
 
 #### Scenario: Section summary display
 - **WHEN** a source file has a section header with 8 traces below it (5 COVERED, 2 PARTIAL, 1 MISSING)
-- **THEN** a code lens appears above the header: "[set-trace] 8 traces: 5 ✓  2 ⚠  1 ✗"
+- **THEN** a code lens appears above the header: "[tracecart] 8 traces: 5 ✓  2 ⚠  1 ✗"
 
 ### Requirement: Graceful degradation
 The LSP server SHALL start without errors even if trace-map.json does not exist. It SHALL produce no diagnostics until a valid trace-map.json appears.

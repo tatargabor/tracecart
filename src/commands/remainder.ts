@@ -4,7 +4,7 @@ import type { Clause, Trace } from '../extract/extract.js';
 
 export async function cmdRemainder(args: string[]): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace remainder <clauses.json> <traces.json>\n');
+    process.stderr.write('Usage: tracecart remainder <clauses.json> <traces.json>\n');
     process.exit(1);
   }
 

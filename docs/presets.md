@@ -35,7 +35,7 @@ Presets decouple domain-specific configuration from the pipeline code. A preset 
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `description` | string | Human-readable description (shown by `set-trace presets`) |
+| `description` | string | Human-readable description (shown by `tracecart presets`) |
 | `version` | string | Semantic version of the preset |
 | `defaults` | object | Default values (currently: `language`) |
 

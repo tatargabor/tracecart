@@ -19,7 +19,7 @@ The LSP server (`lsp/server.py`) independently discovers and polls `trace-map.js
 - Persist filter state across editor restarts
 
 **Non-Goals:**
-- No `.set-trace.json` config file — discovery only
+- No `.tracecart.json` config file — discovery only
 - No changes to the trace-map.json schema
 - No Zed extension changes (Zed has no equivalent decoration API)
 - No LSP protocol changes for toggle (toggle is purely client-side decoration filtering)

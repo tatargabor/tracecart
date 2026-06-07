@@ -1,6 +1,6 @@
 ## Context
 
-set-trace has a forward trace pipeline (source→target) defined in 01-core-engine: extract traces from source documents, match against target sections, report coverage. The extraction pipeline (clause_split → LLM extract → remainder loop) and matching pipeline (trace × target section → status) are designed but not yet fully implemented.
+tracecart has a forward trace pipeline (source→target) defined in 01-core-engine: extract traces from source documents, match against target sections, report coverage. The extraction pipeline (clause_split → LLM extract → remainder loop) and matching pipeline (trace × target section → status) are designed but not yet fully implemented.
 
 The reverse direction (target→source) was deferred to "v2" in 01-core-engine, but the hook-based automatic verification use case requires it immediately. When an LLM modifies a target document, we need to know both:
 - What source claims are MISSING from the target (forward)
@@ -24,7 +24,7 @@ Existing code that this change builds on:
 
 **Non-Goals:**
 - Classifying WHY something is untraced (hallucination vs. creative addition vs. external source) — the user decides
-- Automated correction of untraced claims — set-trace reports, doesn't fix
+- Automated correction of untraced claims — tracecart reports, doesn't fix
 - Reverse trace for temporal override detection — that's still v2
 - Performance optimization for large target documents — v1 targets 50 traces scale
 

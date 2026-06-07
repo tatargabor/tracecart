@@ -1,8 +1,8 @@
 ## Context
 
-set-trace has an extraction + matching pipeline (01-core-engine) and bidirectional trace support (02-reverse-trace). These produce `trace-map.json` from source + target documents. Currently, running the pipeline requires explicit invocation.
+tracecart has an extraction + matching pipeline (01-core-engine) and bidirectional trace support (02-reverse-trace). These produce `trace-map.json` from source + target documents. Currently, running the pipeline requires explicit invocation.
 
-The goal is to make set-trace run **automatically** as a Claude Code hook — invisible to the user. The LLM works, the hook verifies, results feed back, the LLM corrects. A closed loop where the user only sees better output.
+The goal is to make tracecart run **automatically** as a Claude Code hook — invisible to the user. The LLM works, the hook verifies, results feed back, the LLM corrects. A closed loop where the user only sees better output.
 
 Claude Code hooks are shell commands that run at specific lifecycle events. They can be configured in `.claude/settings.json` under `hooks`. The relevant hook points:
 - `PostToolCall` — after each tool call (too granular)
@@ -55,7 +55,7 @@ fi
 
 **Edge case:** If the user manually edited files outside Claude Code, those show up in git diff too. This is correct behavior — trace should verify regardless of who made the change.
 
-### 3. Config: `.set-trace/config.json` in project root
+### 3. Config: `.tracecart/config.json` in project root
 
 ```json
 {
@@ -87,12 +87,12 @@ fi
 Claude Code hooks can return output that gets injected into the conversation. The hook prints a structured summary to stdout:
 
 ```
-[set-trace] order-intake: 98.5% coverage (2 MISSING, 1 PARTIAL)
+[tracecart] order-intake: 98.5% coverage (2 MISSING, 1 PARTIAL)
   MISSING: T-a3f2c1-012 — CNC kapacitás constraint
   MISSING: T-a3f2c1-034 — szállítási határidő
   PARTIAL: T-a3f2c1-027 — felületkezelési idő (only lacquering mentioned)
   UNTRACED: RT-b2d4e7-012 — "max 48h visszaigazolás" not in any source
-[set-trace] Full results: .set-trace/output/order-intake/trace-map.json
+[tracecart] Full results: .tracecart/output/order-intake/trace-map.json
 ```
 
 The LLM sees this in its next turn and can:
@@ -118,10 +118,10 @@ python3 -m set_trace check --source meetings/2024-03-15.md --target specs/order-
 
 ### 6. Pipeline caching: skip if inputs unchanged
 
-The hook stores a hash of source+target file contents in `.set-trace/cache/`. If the hash matches the previous run, skip the pipeline.
+The hook stores a hash of source+target file contents in `.tracecart/cache/`. If the hash matches the previous run, skip the pipeline.
 
 ```
-.set-trace/
+.tracecart/
 ├── config.json
 ├── cache/
 │   └── order-intake.hash    # sha256 of all source+target contents

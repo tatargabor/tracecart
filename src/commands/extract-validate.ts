@@ -5,7 +5,7 @@ import type { Preset } from '../preset.js';
 
 export async function cmdExtractValidate(args: string[], preset: Preset): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace extract-validate <llm_output.txt> <clauses.json> [--source <file>] [--preset <name>]\n');
+    process.stderr.write('Usage: tracecart extract-validate <llm_output.txt> <clauses.json> [--source <file>] [--preset <name>]\n');
     process.exit(1);
   }
 

@@ -9,7 +9,7 @@ The hook SHALL print a structured summary of trace findings to stdout so it appe
 
 #### Scenario: Perfect coverage
 - **WHEN** the pipeline finds 100% forward coverage and 0 untraced reverse claims
-- **THEN** stdout contains a single line: `[set-trace] order-intake: 100% coverage, all target claims traceable`
+- **THEN** stdout contains a single line: `[tracecart] order-intake: 100% coverage, all target claims traceable`
 
 #### Scenario: No output when not triggered
 - **WHEN** the hook determines no trace run is needed
@@ -23,11 +23,11 @@ The hook SHALL cap stdout to the top 10 findings per mapping to avoid flooding t
 - **THEN** stdout shows the 10 highest-priority findings (MISSING first, then UNTRACED, then PARTIAL) and a note: `... and 15 more findings in trace-map.json`
 
 ### Requirement: Trace-map file output
-The hook SHALL write the full `trace-map.json` to `.set-trace/output/{mapping-name}/trace-map.json` for detailed consumption.
+The hook SHALL write the full `trace-map.json` to `.tracecart/output/{mapping-name}/trace-map.json` for detailed consumption.
 
 #### Scenario: Output file written
 - **WHEN** the pipeline completes for mapping "order-intake"
-- **THEN** `.set-trace/output/order-intake/trace-map.json` contains the complete trace-map with forward and reverse traces
+- **THEN** `.tracecart/output/order-intake/trace-map.json` contains the complete trace-map with forward and reverse traces
 
 #### Scenario: LLM reads full results
 - **WHEN** the LLM sees the stdout summary mentioning the trace-map.json path

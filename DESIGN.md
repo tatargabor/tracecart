@@ -1,4 +1,4 @@
-# set-trace — Design Document
+# tracecart — Design Document
 
 ## Project Goal
 
@@ -339,7 +339,7 @@ Downloaded to `3rdparty/` for learning:
 ## File Structure (planned)
 
 ```
-set-trace/
+tracecart/
 ├── DESIGN.md                    # this document
 ├── CLAUDE.md                    # dev instructions for Claude Code
 ├── src/
@@ -410,7 +410,7 @@ Measure how well a raw LLM (without the tool) can find all connections between t
 
 **Method:**
 1. Give the same source+target pair to a raw LLM with the prompt: "List which source statements are covered by the target document"
-2. Run the same pair through set-trace
+2. Run the same pair through tracecart
 3. Compare both against ground truth
 4. Repeat at increasing scales: 20, 50, 100, 200, 500 traces
 
@@ -435,19 +435,19 @@ Measure how well a raw LLM (without the tool) can find all connections between t
 
 ### Primary: Specification verification
 
-An agent writes a specification (system design, functional spec) based on input requirements. set-trace verifies that the written spec covers everything from the input.
+An agent writes a specification (system design, functional spec) based on input requirements. tracecart verifies that the written spec covers everything from the input.
 
 **Workflow:**
 ```
 1. Agent receives input requirements (meetings, emails, client docs)
 2. Agent writes specification
-3. set-trace runs: input requirements (source) vs. written spec (target)
-4. set-trace reports: "12 traces MISSING, 8 PARTIAL"
+3. tracecart runs: input requirements (source) vs. written spec (target)
+4. tracecart reports: "12 traces MISSING, 8 PARTIAL"
 5. Agent receives feedback, iterates on the spec
 6. Loop until coverage = 100%
 ```
 
-This can be called **during** specification writing as a live feedback loop — the agent invokes set-trace after each section to check completeness.
+This can be called **during** specification writing as a live feedback loop — the agent invokes tracecart after each section to check completeness.
 
 ### Secondary use cases
 
@@ -462,8 +462,8 @@ This can be called **during** specification writing as a live feedback loop — 
 
 ### Integration pattern: Agent-as-user
 
-set-trace is designed to be called by other agents, not just humans:
-- A spec-writing agent calls set-trace as a verification step
+tracecart is designed to be called by other agents, not just humans:
+- A spec-writing agent calls tracecart as a verification step
 - A code-generation agent uses it to verify feature completeness
 - A documentation agent uses it to ensure no gaps in docs
 

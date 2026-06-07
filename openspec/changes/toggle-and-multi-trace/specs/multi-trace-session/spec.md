@@ -27,15 +27,15 @@ The extension SHALL merge all discovered trace-maps into a single combined view 
 - **THEN** status bar shows combined coverage statistics across all sessions
 
 ### Requirement: Session selector
-The extension SHALL provide a `set-trace: Select Session` command that opens a quick-pick with all discovered sessions plus an "All sessions" option. Selecting a session filters decorations to only that session's traces.
+The extension SHALL provide a `tracecart: Select Session` command that opens a quick-pick with all discovered sessions plus an "All sessions" option. Selecting a session filters decorations to only that session's traces.
 
 #### Scenario: Select specific session
-- **WHEN** user runs `set-trace: Select Session` and picks "specs/auth"
+- **WHEN** user runs `tracecart: Select Session` and picks "specs/auth"
 - **THEN** only traces from `specs/auth/trace-map.json` are shown
 - **THEN** status bar shows stats for that session only
 
 #### Scenario: Select all sessions
-- **WHEN** user runs `set-trace: Select Session` and picks "All sessions"
+- **WHEN** user runs `tracecart: Select Session` and picks "All sessions"
 - **THEN** merged view is restored with all traces visible
 
 ### Requirement: Session naming

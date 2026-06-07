@@ -3,7 +3,7 @@ import { processDocument } from '../parse/clause-split.js';
 
 export async function cmdSplit(args: string[]): Promise<void> {
   if (!args[0]) {
-    process.stderr.write('Usage: set-trace split <source.md> [--lang hu|en]\n');
+    process.stderr.write('Usage: tracecart split <source.md> [--lang hu|en]\n');
     process.exit(1);
   }
 

@@ -2,7 +2,7 @@
 
 ## Kontextus
 
-A **set-trace** projekt egy claim traceability tool: source dokumentumokból (meeting notes, emailek) atomi trace-eket extraktál, és ellenőrzi hogy egy target dokumentum (design, spec) teljesen lefedi-e őket. A pipeline: PARSE → EXTRACT → MATCH → OUTPUT → `trace-map.json`. LSP szerveren keresztül vizualizál editorban.
+A **tracecart** projekt egy claim traceability tool: source dokumentumokból (meeting notes, emailek) atomi trace-eket extraktál, és ellenőrzi hogy egy target dokumentum (design, spec) teljesen lefedi-e őket. A pipeline: PARSE → EXTRACT → MATCH → OUTPUT → `trace-map.json`. LSP szerveren keresztül vizualizál editorban.
 
 Van egy meglévő OpenSpec change (`core-engine-v1`) ami a v1 pipeline-t definiálja — forward trace only (source→target). A kód részben kész: clause_split, parse_document, discover_inputs, remainder tracker skeleton, trace_map output skeleton. Az extract és match modulok még implementálandók.
 
@@ -12,7 +12,7 @@ Lásd: `DESIGN.md` (teljes architektúra), `openspec/changes/core-engine-v1/` (m
 
 Az LLM agent kap egy feladatot (pl. "tervezd bele ezt a meeting notes-t a designba"), megcsinálja a legjobb tudása szerint, de **nem tudja visszaellenőrizni** hogy 100%-ban lefedett-e mindent. Ha megkérjük sem fogja tudni — azért írjuk a toolt, mert az LLM alapból tévedhet.
 
-A set-trace-nek **invisible crutch**-ként kell működnie: a felhasználó nem tudja hogy fut, nem kell explicit hívni. Csak azt tapasztalja hogy az LLM megbízhatóbban dolgozik.
+A tracecart-nek **invisible crutch**-ként kell működnie: a felhasználó nem tudja hogy fut, nem kell explicit hívni. Csak azt tapasztalja hogy az LLM megbízhatóbban dolgozik.
 
 ## Két egymásra épülő change kell
 
@@ -74,7 +74,7 @@ A reverse trace a `core-engine-v1` change amendment-je legyen, vagy külön chan
 │                                                      ▼           │
 │                                              ┌──────────────┐   │
 │                                              │  HOOK         │   │
-│                                              │  set-trace    │   │
+│                                              │  tracecart    │   │
 │                                              │  runs auto    │   │
 │                                              └──────┬───────┘   │
 │                                                      │           │
@@ -99,7 +99,7 @@ A reverse trace a `core-engine-v1` change amendment-je legyen, vagy külön chan
 #### Config
 
 ```json
-// .set-trace/config.json (vagy más helyen — tervező döntse el)
+// .tracecart/config.json (vagy más helyen — tervező döntse el)
 {
   "mappings": [
     {
@@ -126,7 +126,7 @@ LLM dolgozik → editál → kész
     │ skip  │
     └───────┘   │
                 ▼
-        set-trace pipeline fut
+        tracecart pipeline fut
         (forward + reverse)
                 │
                 ▼
@@ -149,13 +149,13 @@ LLM dolgozik → editál → kész
    - Summary szöveg a lényeges finding-ekkel
 
 2. **Config formátum és helye:**
-   - `.set-trace/config.json`?
+   - `.tracecart/config.json`?
    - `CLAUDE.md`-be annotáció?
    - Más?
 
 3. **Pipeline futási idő:** Jelentős lehet — kell-e async/background mód ahol a hook nem blokkolja a usert?
 
-4. **Scope:** A hook csak Claude Code hook-ként működjön, vagy legyen CLI is (`set-trace check`) amit bármilyen CI/hook rendszerből hívhatunk?
+4. **Scope:** A hook csak Claude Code hook-ként működjön, vagy legyen CLI is (`tracecart check`) amit bármilyen CI/hook rendszerből hívhatunk?
 
 ## Függőségek
 

@@ -46,7 +46,7 @@ Fixtures in `tests/fixtures/` are real document pairs with known trace-maps. The
 
 ### Integration tests (require LLM, slow)
 
-Not automated — run manually via the `/set:trace` skill on fixture data. The LLM output varies between runs, but the deterministic validation catches structural issues.
+Not automated — run manually via the `/tracecart` skill on fixture data. The LLM output varies between runs, but the deterministic validation catches structural issues.
 
 ## Adding tests
 

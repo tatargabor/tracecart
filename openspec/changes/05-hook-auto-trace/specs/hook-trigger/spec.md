@@ -4,7 +4,7 @@
 The system SHALL register a Claude Code hook at the `Stop` event that runs the trace verification pipeline.
 
 #### Scenario: Hook configured in settings
-- **WHEN** a project has `.set-trace/config.json` with at least one mapping
+- **WHEN** a project has `.tracecart/config.json` with at least one mapping
 - **THEN** the hook is registered in `.claude/settings.json` under `hooks.Stop` and runs the trace check script
 
 ### Requirement: Change detection via git diff
@@ -37,7 +37,7 @@ The hook SHALL cache a hash of source+target file contents after each pipeline r
 The hook SHALL produce no output and exit with code 0 when no trace run is needed. The user and LLM SHALL NOT be aware the hook ran.
 
 #### Scenario: No config file
-- **WHEN** the project has no `.set-trace/config.json`
+- **WHEN** the project has no `.tracecart/config.json`
 - **THEN** the hook exits silently
 
 #### Scenario: No changes detected

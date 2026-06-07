@@ -47,7 +47,7 @@ Generator (deterministic)
 Five scale levels. At each level:
 - Generate source with N traces
 - Generate 4 targets (100%, 75%, 50%, 25% coverage)
-- Run set-trace on each pair
+- Run tracecart on each pair
 - Run raw LLM on each pair (same task, no tool)
 - Score both against ground truth
 
@@ -59,7 +59,7 @@ Here are two documents. List which statements from Document A
 are covered by Document B. For each, state: COVERED, PARTIAL, or MISSING.
 ```
 
-set-trace gets the same documents through its full pipeline.
+tracecart gets the same documents through its full pipeline.
 
 Both outputs scored against the same ground truth. The comparison proves where the tool adds value.
 

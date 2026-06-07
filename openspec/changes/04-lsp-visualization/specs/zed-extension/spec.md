@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: Zed extension manifest
-The project SHALL include a Zed extension configuration that registers the set-trace LSP server for markdown files.
+The project SHALL include a Zed extension configuration that registers the tracecart LSP server for markdown files.
 
 #### Scenario: Extension activates on markdown
 - **WHEN** a user opens a .md file in a workspace containing trace-map.json
-- **THEN** Zed activates the set-trace LSP server
+- **THEN** Zed activates the tracecart LSP server
 
 #### Scenario: Extension does not activate without trace-map
 - **WHEN** a user opens a .md file in a workspace WITHOUT trace-map.json
-- **THEN** the set-trace LSP server is NOT activated
+- **THEN** the tracecart LSP server is NOT activated
 
 ### Requirement: Zero-config installation
 The Zed extension SHALL work with minimal setup: install the extension, have pygls installed, and trace-map.json in the project root.

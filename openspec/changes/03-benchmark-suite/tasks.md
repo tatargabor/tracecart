@@ -19,7 +19,7 @@
 
 - [ ] 3.1 Create raw LLM baseline runner (sends source+target to LLM with traceability prompt)
 - [ ] 3.2 Implement 3 prompt variants for raw LLM (simple list, structured JSON, CoT)
-- [ ] 3.3 Implement comparison runner: for each scale × coverage_pct, run both set-trace and raw LLM
+- [ ] 3.3 Implement comparison runner: for each scale × coverage_pct, run both tracecart and raw LLM
 - [ ] 3.4 Parse raw LLM output into comparable format (normalize to trace_id → status)
 - [ ] 3.5 Generate comparison report (markdown + JSON)
 

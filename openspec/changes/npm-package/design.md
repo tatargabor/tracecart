@@ -1,15 +1,15 @@
 ## Context
 
-set-trace is a traceability pipeline that extracts atomic traces from source documents and verifies coverage against target documents. The core engine is ~2100 lines of pure-stdlib Python (no external dependencies), orchestrated manually by Claude Code. The pipeline alternates deterministic steps (split, validate, remainder, finalize) with LLM steps (extraction, matching) handled by Claude Code subagents.
+tracecart is a traceability pipeline that extracts atomic traces from source documents and verifies coverage against target documents. The core engine is ~2100 lines of pure-stdlib Python (no external dependencies), orchestrated manually by Claude Code. The pipeline alternates deterministic steps (split, validate, remainder, finalize) with LLM steps (extraction, matching) handled by Claude Code subagents.
 
-The goal is to package this as an npm package so anyone can `npm install -g`, run `set-trace init` in their project, and use `/set:trace` from Claude Code to run the full pipeline.
+The goal is to package this as an npm package so anyone can `npm install -g`, run `tracecart init` in their project, and use `/tracecart` from Claude Code to run the full pipeline.
 
 ## Goals / Non-Goals
 
 **Goals:**
 - npm package installable globally, works on Mac + Linux with Node.js ≥ 18
-- `set-trace <subcommand>` CLI with identical behavior to current `python3 src/run_trace.py <subcommand>`
-- `set-trace init` copies Claude Code command markdown into target project
+- `tracecart <subcommand>` CLI with identical behavior to current `python3 src/run_trace.py <subcommand>`
+- `tracecart init` copies Claude Code command markdown into target project
 - Zero runtime dependencies (pure Node.js stdlib: fs, path, crypto, child_process not needed)
 - All existing test fixtures produce identical output after port
 - Command markdown is a deterministic recipe Claude Code follows without interpretation
@@ -41,11 +41,11 @@ Each Python module maps to a TypeScript module with the same exports and JSON I/
 
 The pipeline step sequence lives in `.claude/commands/set/trace.md` — a markdown file that Claude Code reads and follows deterministically. The CLI provides stateless subcommands; the command markdown defines the order, loops, and subagent calls.
 
-**Why not a Python/TS orchestrator:** The command markdown is readable, auditable, and deterministic. Claude follows explicit steps instead of interpreting a protocol. The pipeline structure rarely changes; when it does, `set-trace update` refreshes the markdown.
+**Why not a Python/TS orchestrator:** The command markdown is readable, auditable, and deterministic. Claude follows explicit steps instead of interpreting a protocol. The pipeline structure rarely changes; when it does, `tracecart update` refreshes the markdown.
 
 **Why not fully automatic (CLI runs everything):** The LLM steps (extraction, matching) must go through Claude Code subagents. There's no way for a CLI to invoke Claude Code's Agent tool. The command markdown is the natural bridge.
 
-### 4. `set-trace init` copies, `set-trace update` refreshes
+### 4. `tracecart init` copies, `tracecart update` refreshes
 
 `init` copies the command markdown template from the installed package into the project's `.claude/commands/set/`. `update` compares versions and replaces if newer.
 
@@ -54,7 +54,7 @@ The pipeline step sequence lives in `.claude/commands/set/trace.md` — a markdo
 ### 5. Package structure
 
 ```
-package.json          ← bin: { "set-trace": "./dist/cli.js" }
+package.json          ← bin: { "tracecart": "./dist/cli.js" }
 tsconfig.json
 src/
   cli.ts              ← entry point, subcommand dispatch
@@ -91,5 +91,5 @@ The `prompts/` directory contains `{variable}` placeholder templates. These are 
 
 - **[Port correctness]** TypeScript regex behavior differs subtly from Python (Unicode handling, named groups). → Mitigation: test every module against fixture data, diff outputs byte-for-byte.
 - **[Node.js version]** Requiring Node.js ≥ 18 excludes older systems. → Mitigation: 18 is LTS, mainstream. ≥ 20 if we need newer APIs.
-- **[Command markdown staleness]** After `set-trace init`, the copied markdown can go stale. → Mitigation: version comment in markdown + `set-trace update` command. Pipeline structure changes are rare (annually).
+- **[Command markdown staleness]** After `tracecart init`, the copied markdown can go stale. → Mitigation: version comment in markdown + `tracecart update` command. Pipeline structure changes are rare (annually).
 - **[Prompt path resolution]** The CLI must find `prompts/` relative to the installed package, not cwd. → Mitigation: `__dirname`-relative path resolution in cli.ts.

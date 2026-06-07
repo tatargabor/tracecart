@@ -15,11 +15,11 @@ The raw LLM baseline SHALL be tested with at least 3 different prompt formulatio
 - **THEN** three different prompts are tested and the highest-scoring result is reported
 
 ### Requirement: Scale progression comparison
-The comparison SHALL run at each scale level (20, 50, 100, 200, 500 traces) and report metrics for both set-trace and raw LLM at each level.
+The comparison SHALL run at each scale level (20, 50, 100, 200, 500 traces) and report metrics for both tracecart and raw LLM at each level.
 
 #### Scenario: Breakpoint identification
 - **WHEN** results are collected across all scales
-- **THEN** the report identifies the scale at which set-trace first outperforms the raw LLM by >10% on detection recall
+- **THEN** the report identifies the scale at which tracecart first outperforms the raw LLM by >10% on detection recall
 
 ### Requirement: Results reproducibility
 Each benchmark run SHALL use a fixed random seed and record the model version used. Results SHALL be reproducible by re-running with the same parameters.

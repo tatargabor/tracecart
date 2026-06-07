@@ -5,7 +5,7 @@ import type { Preset } from '../preset.js';
 
 export async function cmdMatchPrompt(args: string[], pkgRoot: string, preset: Preset): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace match-prompt <traces.json> <target.md> [--exclusions <text>] [--preset <name>]\n');
+    process.stderr.write('Usage: tracecart match-prompt <traces.json> <target.md> [--exclusions <text>] [--preset <name>]\n');
     process.exit(1);
   }
 

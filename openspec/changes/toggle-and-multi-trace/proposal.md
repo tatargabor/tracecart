@@ -5,9 +5,9 @@ The VS Code extension shows all trace decorations unconditionally — no way to 
 ## What Changes
 
 - **Toggle commands**: three new VS Code commands to control visualization visibility:
-  - `set-trace: Toggle Visualization` — master on/off switch (status bar click also toggles)
-  - `set-trace: Toggle Covered` — hide/show covered (green) decorations to reduce visual noise
-  - `set-trace: Toggle Direction` — cycle through forward / reverse / both
+  - `tracecart: Toggle Visualization` — master on/off switch (status bar click also toggles)
+  - `tracecart: Toggle Covered` — hide/show covered (green) decorations to reduce visual noise
+  - `tracecart: Toggle Direction` — cycle through forward / reverse / both
 - **Multi-trace discovery**: auto-discover all `**/trace-map.json` files in the workspace, not just the root
 - **Session selector**: merged view by default, with quick-pick to filter to a specific trace session
 - **Session naming**: auto-generate session names from trace-map `meta.source` + `meta.target`

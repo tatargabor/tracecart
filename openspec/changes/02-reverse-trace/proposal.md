@@ -1,6 +1,6 @@
 ## Why
 
-The 01-core-engine change only implements forward trace (source→target: "did the target cover everything from the source?"). But during matching, the pipeline already iterates over target sections — detecting claims in the target that trace back to NO source is practically free. Without reverse trace, the tool is half-blind: it finds what's missing from the target, but cannot detect hallucinations or unsupported claims the LLM added. This is critical for the hook-based automatic verification use case where set-trace acts as an invisible quality gate.
+The 01-core-engine change only implements forward trace (source→target: "did the target cover everything from the source?"). But during matching, the pipeline already iterates over target sections — detecting claims in the target that trace back to NO source is practically free. Without reverse trace, the tool is half-blind: it finds what's missing from the target, but cannot detect hallucinations or unsupported claims the LLM added. This is critical for the hook-based automatic verification use case where tracecart acts as an invisible quality gate.
 
 ## What Changes
 

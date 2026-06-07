@@ -1,7 +1,7 @@
 ## 1. Status bar summary
 
 - [x] 1.1 Add status bar item to VS Code extension that reads trace-map.json summary
-- [x] 1.2 Format display: "set-trace: 79.7% | 24✓ 3⚠ 5✗" with reverse if present
+- [x] 1.2 Format display: "tracecart: 79.7% | 24✓ 3⚠ 5✗" with reverse if present
 - [x] 1.3 Click action opens Problems panel
 - [x] 1.4 Auto-refresh on trace-map.json file change via existing watcher
 

@@ -1,4 +1,4 @@
-# set-trace Zed Extension
+# tracecart Zed Extension
 
 Coverage diagnostics for claim traceability. Colors source document sentences by coverage status, enables click-to-navigate between source and target, and shows per-section summaries.
 
@@ -11,7 +11,7 @@ pip install pygls
 ## Setup
 
 1. Install the extension in Zed
-2. Run the set-trace pipeline to generate `trace-map.json` in your project root
+2. Run the tracecart pipeline to generate `trace-map.json` in your project root
 3. Open any `.md` file — diagnostics appear automatically
 
 ## What you see
@@ -23,7 +23,7 @@ pip install pygls
 | Subtle hint | COVERED — fully addressed in target |
 | Blue info | DEFERRED — out of current scope |
 
-Above section headers: `[set-trace] 8 traces: 5 ✓  2 ⚠  1 ✗`
+Above section headers: `[tracecart] 8 traces: 5 ✓  2 ⚠  1 ✗`
 
 ## Navigation
 

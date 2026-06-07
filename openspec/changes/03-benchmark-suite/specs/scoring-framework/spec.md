@@ -23,7 +23,7 @@ The scoring framework SHALL produce a comparison table showing how metrics chang
 
 #### Scenario: Degradation visible
 - **WHEN** results exist for all scale levels
-- **THEN** a markdown table shows metrics per scale level for both set-trace and raw LLM
+- **THEN** a markdown table shows metrics per scale level for both tracecart and raw LLM
 
 ### Requirement: Per-category breakdown
 The scoring framework SHALL break down results by trace difficulty category (explicit, compound, implicit, nuance) when ground truth includes difficulty tags.

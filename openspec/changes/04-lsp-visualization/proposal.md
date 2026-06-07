@@ -58,7 +58,7 @@ Source document:
 ```
 ┌─ source/meeting-2024-01.md ─────────────────────────────────┐
 │                                                              │
-│ [set-trace] 8 traces: 5 ✓  2 ⚠  1 ✗          ← code lens  │
+│ [tracecart] 8 traces: 5 ✓  2 ⚠  1 ✗          ← code lens  │
 │ ## 9.3 Visszaigazolás                                        │
 │                                                              │
 │ ███ A visszaigazolás figyelembe veszi a CNC kapacitást  ← green (COVERED)
@@ -91,7 +91,7 @@ LSP polls trace-map.json mtime every 2 seconds. When it changes → re-read → 
 
 ### Only one dependency
 
-The entire set-trace project has zero external Python dependencies. The LSP server is the single exception: it needs `pygls` (pip install pygls). That's it.
+The entire tracecart project has zero external Python dependencies. The LSP server is the single exception: it needs `pygls` (pip install pygls). That's it.
 
 ## What Changes
 

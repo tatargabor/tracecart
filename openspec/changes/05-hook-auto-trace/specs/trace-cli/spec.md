@@ -5,7 +5,7 @@ The system SHALL provide a CLI entrypoint for running trace verification manuall
 
 #### Scenario: Run all mappings
 - **WHEN** the user runs `python3 -m set_trace check`
-- **THEN** the system reads `.set-trace/config.json`, runs the pipeline for all mappings, and prints results to stdout
+- **THEN** the system reads `.tracecart/config.json`, runs the pipeline for all mappings, and prints results to stdout
 
 #### Scenario: Run specific mapping
 - **WHEN** the user runs `python3 -m set_trace check --mapping order-intake`

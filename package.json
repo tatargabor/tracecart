@@ -1,5 +1,5 @@
 {
-  "name": "@set-trace/cli",
+  "name": "@tracecart/cli",
   "version": "0.1.0",
   "description": "Claim traceability tool — extract traces from source documents, verify coverage against targets",
   "keywords": [
@@ -12,10 +12,10 @@
     "claude-code",
     "reverse-trace"
   ],
-  "homepage": "https://github.com/tatargabor/set-trace",
+  "homepage": "https://github.com/tatargabor/tracecart",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tatargabor/set-trace"
+    "url": "https://github.com/tatargabor/tracecart"
   },
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,7 @@
     }
   },
   "bin": {
-    "set-trace": "./dist/cli.js"
+    "tracecart": "./dist/cli.js"
   },
   "files": [
     "dist",

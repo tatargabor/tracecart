@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""set-trace LSP server.
+"""tracecart LSP server.
 
 Reads trace-map.json and provides:
 - Diagnostics: color sentences by coverage status
@@ -31,10 +31,10 @@ try:
     from lsprotocol import types
 except ImportError:
     print("LSP server requires pygls: pip install pygls", file=sys.stderr)
-    print("This is the only external dependency of set-trace.", file=sys.stderr)
+    print("This is the only external dependency of tracecart.", file=sys.stderr)
     sys.exit(1)
 
-logger = logging.getLogger("set-trace-lsp")
+logger = logging.getLogger("tracecart-lsp")
 
 POLL_INTERVAL = 2.0
 
@@ -54,7 +54,7 @@ SKIP_STATUSES = {'N/A', 'TRACED'}
 
 class SetTraceServer(LanguageServer):
     def __init__(self):
-        super().__init__("set-trace-lsp", "v0.3.0")
+        super().__init__("tracecart-lsp", "v0.3.0")
         self._trace_map: dict | None = None
         self._trace_map_paths: list[Path] = []
         self._trace_map_mtimes: dict[str, float] = {}
@@ -177,7 +177,7 @@ class SetTraceServer(LanguageServer):
                     end=types.Position(line=line, character=col_end),
                 ),
                 severity=severity,
-                source="set-trace",
+                source="tracecart",
                 message=message,
             ))
 
@@ -213,7 +213,7 @@ class SetTraceServer(LanguageServer):
                     end=types.Position(line=line, character=col_end),
                 ),
                 severity=severity,
-                source="set-trace-reverse",
+                source="tracecart-reverse",
                 message=message,
             ))
 
@@ -273,7 +273,7 @@ class SetTraceServer(LanguageServer):
             if counts['other']:
                 parts.append(f"{counts['other']} ○")
 
-            title = f"[set-trace] {counts['total']} traces: {'  '.join(parts)}"
+            title = f"[tracecart] {counts['total']} traces: {'  '.join(parts)}"
             display_line = max(section_line - 1, 0)
 
             lenses.append(types.CodeLens(

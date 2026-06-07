@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Configuration file format
-The system SHALL read source↔target file mappings from `.set-trace/config.json` in the project root.
+The system SHALL read source↔target file mappings from `.tracecart/config.json` in the project root.
 
 #### Scenario: Valid config with one mapping
-- **WHEN** `.set-trace/config.json` contains `{"mappings": [{"name": "order-intake", "sources": ["meetings/*.md"], "targets": ["specs/order-intake.md"]}]}`
+- **WHEN** `.tracecart/config.json` contains `{"mappings": [{"name": "order-intake", "sources": ["meetings/*.md"], "targets": ["specs/order-intake.md"]}]}`
 - **THEN** the system recognizes one mapping named "order-intake" with the specified source and target patterns
 
 #### Scenario: Multiple mappings
@@ -23,8 +23,8 @@ The system SHALL validate the config file on load and report clear errors for ma
 - **THEN** the system prints an error identifying the mapping and the missing field, and skips that mapping
 
 #### Scenario: Config file not found
-- **WHEN** `.set-trace/config.json` does not exist
-- **THEN** the system exits silently (no error — the project simply doesn't use set-trace)
+- **WHEN** `.tracecart/config.json` does not exist
+- **THEN** the system exits silently (no error — the project simply doesn't use tracecart)
 
 ### Requirement: Mapping name uniqueness
 Each mapping SHALL have a unique `name` field used for output directory naming and human-readable reporting.

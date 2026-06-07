@@ -1,6 +1,6 @@
 ## Why
 
-The pipeline currently hardcodes a single use case: "meeting notes → functional spec coverage" with Hungarian-specific prompt templates, trace types (REQUIREMENT, DECISION, WISH, EXCLUSION, OPEN_QUESTION), and coverage statuses (COVERED, PARTIAL, MISSING, DEFERRED, N/A). To make set-trace usable for other comparison types (test coverage, contract compliance, changelog consistency) without forking the codebase, the domain-specific configuration needs to be extracted into a preset system.
+The pipeline currently hardcodes a single use case: "meeting notes → functional spec coverage" with Hungarian-specific prompt templates, trace types (REQUIREMENT, DECISION, WISH, EXCLUSION, OPEN_QUESTION), and coverage statuses (COVERED, PARTIAL, MISSING, DEFERRED, N/A). To make tracecart usable for other comparison types (test coverage, contract compliance, changelog consistency) without forking the codebase, the domain-specific configuration needs to be extracted into a preset system.
 
 ## What Changes
 

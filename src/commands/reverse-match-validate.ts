@@ -3,7 +3,7 @@ import { validateReverseMatches } from '../match/coverage.js';
 
 export async function cmdReverseMatchValidate(args: string[]): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace reverse-match-validate <llm_output.txt> <reverse_traces.json>\n');
+    process.stderr.write('Usage: tracecart reverse-match-validate <llm_output.txt> <reverse_traces.json>\n');
     process.exit(1);
   }
 

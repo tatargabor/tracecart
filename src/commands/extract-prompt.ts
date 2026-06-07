@@ -16,7 +16,7 @@ function parseArgs(args: string[]): { clausesPath: string; sourceFile: string } 
 
 export async function cmdExtractPrompt(args: string[], pkgRoot: string, preset: Preset): Promise<void> {
   if (!args[0]) {
-    process.stderr.write('Usage: set-trace extract-prompt <clauses.json> [--source <file>] [--preset <name>]\n');
+    process.stderr.write('Usage: tracecart extract-prompt <clauses.json> [--source <file>] [--preset <name>]\n');
     process.exit(1);
   }
 

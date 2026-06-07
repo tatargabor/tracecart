@@ -4,7 +4,7 @@ import type { Clause } from '../extract/extract.js';
 
 export async function cmdReverseExtractValidate(args: string[]): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace reverse-extract-validate <llm_output.txt> <clauses.json> [--target <file>]\n');
+    process.stderr.write('Usage: tracecart reverse-extract-validate <llm_output.txt> <clauses.json> [--target <file>]\n');
     process.exit(1);
   }
 

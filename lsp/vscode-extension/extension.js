@@ -131,7 +131,7 @@ function makeNavLink(label, fileStr, line) {
     if (!resolved || !line) return `${label}`;
     const uri = vscode.Uri.file(resolved);
     const args = encodeURIComponent(JSON.stringify([uri.toString(), line]));
-    return `[${label}](command:set-trace.goto?${args})`;
+    return `[${label}](command:tracecart.goto?${args})`;
 }
 
 function buildHover(trace) {
@@ -236,7 +236,7 @@ function updateStatusBar() {
     }
 
     if (!filterState.enabled) {
-        statusBarItem.text = 'set-trace (off)';
+        statusBarItem.text = 'tracecart (off)';
         statusBarItem.show();
         return;
     }
@@ -251,7 +251,7 @@ function updateStatusBar() {
     const sessionCount = Object.keys(traceMaps).length;
     const sessionLabel = filterState.activeSession !== 'all' ? ` [${filterState.activeSession}]`
         : sessionCount > 1 ? ` [${sessionCount}]` : '';
-    let text = `set-trace${sessionLabel}: ${pct}% | ${c}✓ ${p}⚠ ${m}✗`;
+    let text = `tracecart${sessionLabel}: ${pct}% | ${c}✓ ${p}⚠ ${m}✗`;
 
     if (s.reverse_coverage_pct !== undefined) {
         text += ` ↔ ${s.reverse_coverage_pct}%`;
@@ -276,14 +276,14 @@ async function refreshAll() {
 }
 
 function loadState(context) {
-    const saved = context.workspaceState.get('set-trace.filterState');
+    const saved = context.workspaceState.get('tracecart.filterState');
     if (saved) {
         filterState = { ...filterState, ...saved };
     }
 }
 
 function saveState(context) {
-    context.workspaceState.update('set-trace.filterState', filterState);
+    context.workspaceState.update('tracecart.filterState', filterState);
 }
 
 async function handleStatusBarClick(context) {
@@ -312,7 +312,7 @@ async function handleStatusBarClick(context) {
         { label: `$(arrow-swap) Direction: ${filterState.direction}`, id: 'direction' },
     ];
 
-    const picked = await vscode.window.showQuickPick(items, { placeHolder: 'set-trace options' });
+    const picked = await vscode.window.showQuickPick(items, { placeHolder: 'tracecart options' });
     if (!picked) return;
 
     switch (picked.id) {
@@ -369,7 +369,7 @@ async function selectSession(context) {
 }
 
 function activate(context) {
-    const config = vscode.workspace.getConfiguration('set-trace');
+    const config = vscode.workspace.getConfiguration('tracecart');
     const pythonPath = config.get('pythonPath', 'python3');
     const serverScript = findServerScript();
 
@@ -386,18 +386,18 @@ function activate(context) {
         }
     };
 
-    client = new LanguageClient('set-trace', 'set-trace LSP', serverOptions, clientOptions);
+    client = new LanguageClient('tracecart', 'tracecart LSP', serverOptions, clientOptions);
     client.start();
 
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
-    statusBarItem.command = 'set-trace.statusBarClick';
-    statusBarItem.tooltip = 'set-trace — click to toggle or select session';
+    statusBarItem.command = 'tracecart.statusBarClick';
+    statusBarItem.tooltip = 'tracecart — click to toggle or select session';
     context.subscriptions.push(statusBarItem);
 
     loadState(context);
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('set-trace.goto', (uriStr, line) => {
+        vscode.commands.registerCommand('tracecart.goto', (uriStr, line) => {
             const uri = vscode.Uri.parse(uriStr);
             const pos = new vscode.Position(Math.max(line - 1, 0), 0);
             vscode.window.showTextDocument(uri, {
@@ -406,9 +406,9 @@ function activate(context) {
             });
         }),
 
-        vscode.commands.registerCommand('set-trace.statusBarClick', () => handleStatusBarClick(context)),
+        vscode.commands.registerCommand('tracecart.statusBarClick', () => handleStatusBarClick(context)),
 
-        vscode.commands.registerCommand('set-trace.toggleVisualization', () => {
+        vscode.commands.registerCommand('tracecart.toggleVisualization', () => {
             filterState.enabled = !filterState.enabled;
             saveState(context);
             updateStatusBar();
@@ -417,7 +417,7 @@ function activate(context) {
             }
         }),
 
-        vscode.commands.registerCommand('set-trace.toggleCovered', () => {
+        vscode.commands.registerCommand('tracecart.toggleCovered', () => {
             filterState.showCovered = !filterState.showCovered;
             saveState(context);
             updateStatusBar();
@@ -426,7 +426,7 @@ function activate(context) {
             }
         }),
 
-        vscode.commands.registerCommand('set-trace.toggleDirection', () => {
+        vscode.commands.registerCommand('tracecart.toggleDirection', () => {
             filterState.direction = filterState.direction === 'both' ? 'forward'
                 : filterState.direction === 'forward' ? 'reverse' : 'both';
             saveState(context);
@@ -436,7 +436,7 @@ function activate(context) {
             }
         }),
 
-        vscode.commands.registerCommand('set-trace.selectSession', () => selectSession(context))
+        vscode.commands.registerCommand('tracecart.selectSession', () => selectSession(context))
     );
 
     const watcher = vscode.workspace.createFileSystemWatcher('**/trace-map.json');

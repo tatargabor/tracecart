@@ -77,7 +77,7 @@ info "Tests passed"
 # --- Publish ---
 
 npm publish --access public
-info "Published @set-trace/cli@$NEW_VERSION to npm"
+info "Published @tracecart/cli@$NEW_VERSION to npm"
 
 # --- Git tag + commit ---
 
@@ -95,6 +95,6 @@ gh release create "v$NEW_VERSION" \
 info "GitHub release created"
 
 echo ""
-echo "Published @set-trace/cli@$NEW_VERSION"
-echo "  npm: https://www.npmjs.com/package/@set-trace/cli"
-echo "  gh:  https://github.com/tatargabor/set-trace/releases/tag/v$NEW_VERSION"
+echo "Published @tracecart/cli@$NEW_VERSION"
+echo "  npm: https://www.npmjs.com/package/@tracecart/cli"
+echo "  gh:  https://github.com/tatargabor/tracecart/releases/tag/v$NEW_VERSION"

@@ -2,9 +2,9 @@
 
 - [x] 1.1 Add toggle state object to extension.js: `{ enabled, showCovered, direction, activeSession }` with workspace memento load/save
 - [x] 1.2 Add `applyDecorations` filter logic: skip decorations based on toggle state (enabled, showCovered, direction)
-- [x] 1.3 Register `set-trace.toggleVisualization` command — flips `enabled`, calls `refreshAll`
-- [x] 1.4 Register `set-trace.toggleCovered` command — flips `showCovered`, calls `refreshAll`
-- [x] 1.5 Register `set-trace.toggleDirection` command — cycles `both→forward→reverse→both`, calls `refreshAll`
+- [x] 1.3 Register `tracecart.toggleVisualization` command — flips `enabled`, calls `refreshAll`
+- [x] 1.4 Register `tracecart.toggleCovered` command — flips `showCovered`, calls `refreshAll`
+- [x] 1.5 Register `tracecart.toggleDirection` command — cycles `both→forward→reverse→both`, calls `refreshAll`
 - [x] 1.6 Update status bar: show "(off)" when disabled, reflect current filter state
 - [x] 1.7 Change status bar click to toggle on/off (single trace-map) or open quick-pick (multiple)
 
@@ -17,7 +17,7 @@
 
 ## 3. Session Selector
 
-- [x] 3.1 Register `set-trace.selectSession` command — opens quick-pick with "All sessions" + discovered session names
+- [x] 3.1 Register `tracecart.selectSession` command — opens quick-pick with "All sessions" + discovered session names
 - [x] 3.2 Filter `applyDecorations` and `updateStatusBar` by `activeSession` state
 - [x] 3.3 Session naming: relative dir path, "(root)" for workspace root
 

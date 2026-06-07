@@ -1,15 +1,15 @@
-# set-trace
+# tracecart
 
-[![npm](https://img.shields.io/npm/v/@set-trace/cli)](https://npmjs.com/package/@set-trace/cli)
-[![license](https://img.shields.io/npm/l/@set-trace/cli)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@tracecart/cli)](https://npmjs.com/package/@tracecart/cli)
+[![license](https://img.shields.io/npm/l/@tracecart/cli)](LICENSE)
 
-[Documentation](docs/) · [npm](https://www.npmjs.com/package/@set-trace/cli)
+[Documentation](docs/) · [npm](https://www.npmjs.com/package/@tracecart/cli)
 
 **Claim traceability tool** — extract atomic traces from source documents, verify coverage against targets, detect unsupported claims via reverse tracing.
 
 **The problem:** You have input documents (client specs, meeting notes, emails) and generated implementation specs. How do you know the specs cover everything? Manual review misses implicit requirements, compound sentences, and cross-document overrides.
 
-**set-trace** extracts atomic requirements, verifies each against your target documents, and optionally reverse-traces to catch hallucinations. Output: `trace-map.json` for editor visualization.
+**tracecart** extracts atomic requirements, verifies each against your target documents, and optionally reverse-traces to catch hallucinations. Output: `trace-map.json` for editor visualization.
 
 ## How it works
 
@@ -32,7 +32,7 @@ Two layers:
 ## Install
 
 ```bash
-npm install -g @set-trace/cli
+npm install -g @tracecart/cli
 ```
 
 ## Quick start
@@ -41,29 +41,29 @@ npm install -g @set-trace/cli
 
 ```bash
 # Install commands into your project
-set-trace init
+tracecart init
 
 # Run forward pipeline
-/set:trace source.md target.md
+/tracecart source.md target.md
 
 # Forward + reverse (detect unsupported claims in target)
-/set:trace source.md target.md --reverse
+/tracecart source.md target.md --reverse
 
 # Custom preset
-/set:trace source.md target.md --preset contract-compliance
+/tracecart source.md target.md --preset contract-compliance
 ```
 
 ### CLI commands
 
 ```bash
-set-trace split source.md                          # Split into clauses
-set-trace extract-prompt clauses.json --source source.md --preset spec-coverage
-set-trace extract-validate output.txt clauses.json --source source.md --preset spec-coverage
-set-trace remainder clauses.json traces.json       # Check uncovered clauses
-set-trace match-prompt traces.json target.md --preset spec-coverage
-set-trace match-validate output.txt traces.json --preset spec-coverage
-set-trace finalize traces.json matches.json --source source.md --target target.md -o trace-map.json
-set-trace presets                                  # List available presets
+tracecart split source.md                          # Split into clauses
+tracecart extract-prompt clauses.json --source source.md --preset spec-coverage
+tracecart extract-validate output.txt clauses.json --source source.md --preset spec-coverage
+tracecart remainder clauses.json traces.json       # Check uncovered clauses
+tracecart match-prompt traces.json target.md --preset spec-coverage
+tracecart match-validate output.txt traces.json --preset spec-coverage
+tracecart finalize traces.json matches.json --source source.md --target target.md -o trace-map.json
+tracecart presets                                  # List available presets
 ```
 
 ## Presets
@@ -100,8 +100,8 @@ Coverage markers per trace:
 ## Development
 
 ```bash
-git clone https://github.com/tatargabor/set-trace.git
-cd set-trace
+git clone https://github.com/tatargabor/tracecart.git
+cd tracecart
 npm install
 npm run build
 npm test

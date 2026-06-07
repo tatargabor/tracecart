@@ -13,7 +13,7 @@ This benchmark suite also becomes a **publishable artifact** — open source mod
 
 When a human or LLM reads two documents and tries to match every statement from A to a section in B, they can handle ~20 items easily. At 50, they start missing connections. At 100+, they miss significantly. At 500+, they're essentially guessing.
 
-set-trace solves this by offloading completeness tracking to deterministic code. The model only needs to understand individual statements — it never needs to "hold" the full list in context.
+tracecart solves this by offloading completeness tracking to deterministic code. The model only needs to understand individual statements — it never needs to "hold" the full list in context.
 
 **This benchmark proves this hypothesis quantitatively.** If the hypothesis is wrong, the tool has no reason to exist. If it's right, we have publishable data showing exactly where each model breaks.
 
@@ -37,16 +37,16 @@ The existing benchmark (41 ground truth items, 7 methods) measures extraction qu
 
 ### Model-vs-tool: proving our value
 
-Same source+target pair → raw LLM gets the documents + a traceability prompt → set-trace runs its full pipeline → both scored against same ground truth.
+Same source+target pair → raw LLM gets the documents + a traceability prompt → tracecart runs its full pipeline → both scored against same ground truth.
 
 We test 3 different prompt variants for the raw LLM and use its **best** result — this makes the comparison conservative (we compete against the raw model's best performance, not a strawman).
 
 Expected results by scale:
-- 20 traces: raw LLM ~95%, set-trace ~98% (small difference)
-- 50 traces: raw LLM ~85%, set-trace ~96% (gap opens)
-- 100 traces: raw LLM ~70%, set-trace ~95% (significant)
-- 200 traces: raw LLM ~55%, set-trace ~93% (tool clearly superior)
-- 500 traces: raw LLM ~35%, set-trace ~90% (model essentially fails)
+- 20 traces: raw LLM ~95%, tracecart ~98% (small difference)
+- 50 traces: raw LLM ~85%, tracecart ~96% (gap opens)
+- 100 traces: raw LLM ~70%, tracecart ~95% (significant)
+- 200 traces: raw LLM ~55%, tracecart ~93% (tool clearly superior)
+- 500 traces: raw LLM ~35%, tracecart ~90% (model essentially fails)
 
 These are hypothesized — actual data will tell. Either way, the data is interesting and publishable.
 
@@ -69,7 +69,7 @@ Run the same benchmark with Claude Opus, Sonnet, Haiku, GPT-4o, etc. This produc
 
 - Build a benchmark generator that creates source+target document pairs with deterministic, known coverage percentages (100%, 75%, 50%, 25%)
 - LLM reformulates traces into natural prose (so matching isn't trivial string comparison) while generator controls which traces are included
-- Create model-vs-tool benchmark: same task given to raw LLM vs. set-trace, at increasing scales (20, 50, 100, 200, 500 traces)
+- Create model-vs-tool benchmark: same task given to raw LLM vs. tracecart, at increasing scales (20, 50, 100, 200, 500 traces)
 - Create stress test fixtures: compound sentences, implicit traces, modal verb nuances, near-miss distractors
 - Scoring framework that compares tool output against ground truth and reports precision/recall/F1
 - Generate publishable results (markdown tables, comparison charts data)
@@ -78,7 +78,7 @@ Run the same benchmark with Claude Opus, Sonnet, Haiku, GPT-4o, etc. This produc
 
 ### New Capabilities
 - `benchmark-generator`: Generate source+target document pairs with controlled coverage percentages, using LLM only for reformulation. Deterministic source, deterministic selection, ground truth with certainty.
-- `model-comparison`: Run the same traceability task with raw LLM (no tool) and with set-trace, compare against ground truth at multiple scales. Best-of-3 prompts for raw LLM (conservative comparison).
+- `model-comparison`: Run the same traceability task with raw LLM (no tool) and with tracecart, compare against ground truth at multiple scales. Best-of-3 prompts for raw LLM (conservative comparison).
 - `stress-tests`: Curated edge-case fixtures testing compound splitting, implicit detection, modal sensitivity, near-miss and keyword distractors
 - `scoring-framework`: Score any trace-map.json against ground truth, report detection recall, gap recall, coverage accuracy, false positive rate, F1, per-category breakdown
 

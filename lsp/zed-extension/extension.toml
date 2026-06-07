@@ -1,10 +1,10 @@
 [extension]
-id = "set-trace"
-name = "set-trace"
+id = "tracecart"
+name = "tracecart"
 description = "Claim traceability visualization — coverage diagnostics, navigation, code lens"
 version = "0.2.0"
-authors = ["set-trace contributors"]
+authors = ["tracecart contributors"]
 
-[language_servers.set-trace]
-name = "set-trace"
+[language_servers.tracecart]
+name = "tracecart"
 languages = ["Markdown"]

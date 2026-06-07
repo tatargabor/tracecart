@@ -1,10 +1,10 @@
-# Contributing to set-trace
+# Contributing to tracecart
 
 ## Dev Setup
 
 ```bash
-git clone https://github.com/tatargabor/set-trace.git
-cd set-trace
+git clone https://github.com/tatargabor/tracecart.git
+cd tracecart
 npm install
 npm run build
 ```
@@ -58,7 +58,7 @@ scripts/              Publish and utility scripts
 ## Adding a preset
 
 1. Create `presets/<name>.json` with the required fields (see docs/presets.md)
-2. The preset is automatically discovered by `set-trace presets`
+2. The preset is automatically discovered by `tracecart presets`
 
 ## Tests
 

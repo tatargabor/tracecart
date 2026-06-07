@@ -4,7 +4,7 @@ import { computeSummary } from '../output/trace-map.js';
 
 export async function cmdStatus(args: string[]): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace status <traces.json> <clauses.json>\n');
+    process.stderr.write('Usage: tracecart status <traces.json> <clauses.json>\n');
     process.exit(1);
   }
 

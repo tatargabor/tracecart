@@ -5,7 +5,7 @@ import type { Preset } from '../preset.js';
 
 export async function cmdReverseMatchPrompt(args: string[], pkgRoot: string, preset: Preset): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace reverse-match-prompt <reverse_traces.json> <source_traces.json> [--preset <name>]\n');
+    process.stderr.write('Usage: tracecart reverse-match-prompt <reverse_traces.json> <source_traces.json> [--preset <name>]\n');
     process.exit(1);
   }
 

@@ -4,7 +4,7 @@ import type { Preset } from '../preset.js';
 
 export async function cmdMatchValidate(args: string[], preset: Preset): Promise<void> {
   if (args.length < 2) {
-    process.stderr.write('Usage: set-trace match-validate <llm_output.txt> <traces.json> [--preset <name>]\n');
+    process.stderr.write('Usage: tracecart match-validate <llm_output.txt> <traces.json> [--preset <name>]\n');
     process.exit(1);
   }
 

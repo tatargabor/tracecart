@@ -1,4 +1,4 @@
-# set-trace — Claim Traceability Tool
+# tracecart — Claim Traceability Tool
 
 ## What this is
 
@@ -24,7 +24,7 @@ src/                — TypeScript source (compiled to dist/)
   output/           — trace-map.json generation
   commands/         — CLI command wrappers
   cli.ts            — entry point
-templates/          — Claude Code command markdown (installed via set-trace init)
+templates/          — Claude Code command markdown (installed via tracecart init)
 lsp/                — LSP server (pygls) for editor integration
 prompts/            — LLM prompt templates (hu + en)
 benchmark/          — ground truth data (hu + en)
@@ -36,7 +36,7 @@ openspec/           — change specifications and artifacts
 ## Installation
 
 ```bash
-npm install -g @set-trace/cli
+npm install -g @tracecart/cli
 ```
 
 ## Running
@@ -46,7 +46,7 @@ npm install -g @set-trace/cli
 npm run build
 
 # Test clause splitter
-set-trace split source.md
+tracecart split source.md
 
 # Run from dist directly (during development)
 node dist/cli.js split source.md
@@ -57,62 +57,62 @@ python3 lsp/server.py
 
 ## Running the pipeline (agent workflow)
 
-The pipeline can be run via the Claude Code command `/set:trace`:
+The pipeline can be run via the Claude Code command `/tracecart`:
 
 ```bash
 # Install command markdown into project
-set-trace init
+tracecart init
 
 # Then in Claude Code:
-/set:trace source.md target.md --lang hu
+/tracecart source.md target.md --lang hu
 ```
 
-Or manually, each step is a subcommand of `set-trace`:
+Or manually, each step is a subcommand of `tracecart`:
 
 ```bash
 # Step 1: Split source into clauses
-set-trace split source.md > clauses.json
+tracecart split source.md > clauses.json
 
 # Step 2: Generate extraction prompt (send to subagent)
-set-trace extract-prompt clauses.json --source source.md --lang hu
+tracecart extract-prompt clauses.json --source source.md --lang hu
 
 # Step 3: Validate subagent extraction output
-set-trace extract-validate llm_output.txt clauses.json --source source.md > traces.json
+tracecart extract-validate llm_output.txt clauses.json --source source.md > traces.json
 
 # Step 4: Check remainder (loop until complete or not shrinking, max 3 iterations)
-set-trace remainder clauses.json traces.json
+tracecart remainder clauses.json traces.json
 
 # Step 5: Generate coverage matching prompt (send to subagent)
-set-trace match-prompt traces.json target.md --lang hu
+tracecart match-prompt traces.json target.md --lang hu
 
 # Step 6: Validate subagent matching output
-set-trace match-validate llm_output.txt traces.json > matches.json
+tracecart match-validate llm_output.txt traces.json > matches.json
 
 # Step 7: Generate trace-map.json
-set-trace finalize traces.json matches.json --source source.md --target target.md --output trace-map.json
+tracecart finalize traces.json matches.json --source source.md --target target.md --output trace-map.json
 
 # Check pipeline status
-set-trace status traces.json clauses.json
+tracecart status traces.json clauses.json
 
 # --- Reverse tracing (target→source) ---
 
 # Step R1: Split target into clauses (reuses same split command)
-set-trace split target.md > target_clauses.json
+tracecart split target.md > target_clauses.json
 
 # Step R2: Generate extraction prompt for target (reuses extract-prompt)
-set-trace extract-prompt target_clauses.json --source target.md --lang hu
+tracecart extract-prompt target_clauses.json --source target.md --lang hu
 
 # Step R3: Validate target extraction with RT- prefix
-set-trace reverse-extract-validate llm_output.txt target_clauses.json --target target.md > reverse_traces.json
+tracecart reverse-extract-validate llm_output.txt target_clauses.json --target target.md > reverse_traces.json
 
 # Step R4: Generate reverse matching prompt (target claims vs source traces)
-set-trace reverse-match-prompt reverse_traces.json traces.json --lang hu
+tracecart reverse-match-prompt reverse_traces.json traces.json --lang hu
 
 # Step R5: Validate reverse matching output
-set-trace reverse-match-validate llm_output.txt reverse_traces.json > reverse_matches.json
+tracecart reverse-match-validate llm_output.txt reverse_traces.json > reverse_matches.json
 
 # Step R6: Finalize with both forward and reverse traces
-set-trace finalize traces.json matches.json --source source.md --target target.md --reverse-traces applied_reverse.json --output trace-map.json
+tracecart finalize traces.json matches.json --source source.md --target target.md --reverse-traces applied_reverse.json --output trace-map.json
 ```
 
 The agent interleaves deterministic steps (split, remainder, finalize) with LLM subagent calls (extraction, matching). Test fixtures are in `tests/fixtures/`.

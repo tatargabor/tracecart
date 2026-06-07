@@ -3,7 +3,7 @@
 - [x] 1.1 Create `package.json` with name, version, bin field, zero runtime deps, vitest + typescript as devDeps
 - [x] 1.2 Create `tsconfig.json` targeting ES2022, Node18 module resolution, strict mode
 - [x] 1.3 Create `src/cli.ts` entry point with subcommand dispatch (split, extract-prompt, extract-validate, remainder, match-prompt, match-validate, reverse-extract-validate, reverse-match-prompt, reverse-match-validate, finalize, status, delta, init, update)
-- [x] 1.4 Add build script (`tsc`) and verify `dist/cli.js` runs as `set-trace --version`
+- [x] 1.4 Add build script (`tsc`) and verify `dist/cli.js` runs as `tracecart --version`
 
 ## 2. Port parse modules
 
@@ -43,19 +43,19 @@
 
 ## 7. Init and update commands
 
-- [x] 7.1 Implement `set-trace init` — copies `templates/claude/commands/set/trace.md` to project `.claude/commands/set/trace.md`, creates directories if needed
-- [x] 7.2 Implement `set-trace update` — reads version comment from project command markdown, compares with package version, replaces if newer
+- [x] 7.1 Implement `tracecart init` — copies `templates/claude/commands/set/trace.md` to project `.claude/commands/set/trace.md`, creates directories if needed
+- [x] 7.2 Implement `tracecart update` — reads version comment from project command markdown, compares with package version, replaces if newer
 - [x] 7.3 Test: init creates file, update detects staleness, same-version skips
 
 ## 8. Command markdown (the recipe)
 
 - [x] 8.1 Write `templates/claude/commands/set/trace.md` — deterministic step-by-step recipe for Claude Code: parse args → split → extract loop (subagent + validate + remainder, max 3) → match (subagent + validate) → finalize → report
-- [x] 8.2 Include version comment (`<!-- set-trace v0.1.0 -->`) in the template
-- [ ] 8.3 Test: manually run `/set:trace` against test fixtures, verify trace-map.json output
+- [x] 8.2 Include version comment (`<!-- tracecart v0.1.0 -->`) in the template
+- [ ] 8.3 Test: manually run `/tracecart` against test fixtures, verify trace-map.json output
 
 ## 9. Archive and cleanup
 
 - [x] 9.1 Move Python `src/` to `archive/python-src/` for reference
 - [x] 9.2 Copy test fixtures to `tests/fixtures/` (keep existing structure)
-- [x] 9.3 Update CLAUDE.md with new running instructions (`set-trace` instead of `python3 src/run_trace.py`)
+- [x] 9.3 Update CLAUDE.md with new running instructions (`tracecart` instead of `python3 src/run_trace.py`)
 - [x] 9.4 Update `.gitignore` for `dist/`, `node_modules/`

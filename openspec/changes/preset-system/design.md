@@ -1,6 +1,6 @@
 ## Context
 
-set-trace is an npm package (`@set-trace/cli`) that extracts traces from source documents and verifies coverage against targets. The pipeline is generic (split → extract → match → finalize) but all domain semantics are hardcoded: Hungarian prompt templates, fixed trace types, fixed coverage statuses. The command markdown recipe also hardcodes these assumptions.
+tracecart is an npm package (`@tracecart/cli`) that extracts traces from source documents and verifies coverage against targets. The pipeline is generic (split → extract → match → finalize) but all domain semantics are hardcoded: Hungarian prompt templates, fixed trace types, fixed coverage statuses. The command markdown recipe also hardcodes these assumptions.
 
 From exploration, we confirmed:
 - LLM is required for both extraction and matching (deterministic matching fails due to morphology and synonymy)

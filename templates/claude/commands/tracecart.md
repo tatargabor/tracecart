@@ -1,18 +1,18 @@
-<!-- set-trace v0.2.1 -->
+<!-- tracecart v0.2.1 -->
 ---
-name: "SET: Trace"
+name: "Tracecart"
 description: "Run the full trace pipeline: source → target → trace-map.json. Deterministic CLI steps + LLM subagent extraction and matching."
 ---
 
 # Trace Pipeline
 
-Run the complete set-trace pipeline to extract traces from source documents and verify coverage against target documents.
+Run the complete tracecart pipeline to extract traces from source documents and verify coverage against target documents.
 
-**Input**: `/set:trace <source> <target> [--preset <name>] [--reverse]`
+**Input**: `/tracecart <source> <target> [--preset <name>] [--reverse]`
 
 - `<source>`: path to the source document (authoritative input, e.g., meeting notes)
 - `<target>`: path to the target document (verified for completeness, e.g., spec)
-- `--preset`: preset name, defaults to `spec-coverage`. Run `set-trace presets` to list available presets.
+- `--preset`: preset name, defaults to `spec-coverage`. Run `tracecart presets` to list available presets.
 - `--reverse`: also run reverse tracing (target → source) to detect unsupported claims in the target
 
 Parse `$ARGUMENTS` to extract these. If arguments are missing, ask the user.
@@ -49,7 +49,7 @@ Execute these steps in order. Each step is explicit — follow exactly as writte
 ### Step 1: Split source into clauses
 
 ```bash
-set-trace split <source> > /tmp/set-trace-clauses.json
+tracecart split <source> > /tmp/tracecart-clauses.json
 ```
 
 Report: "Split complete: N content clauses from M lines."
@@ -63,19 +63,19 @@ Set `iteration = 1` and `previous_remaining = Infinity`.
 #### 2a. Generate extraction prompt
 
 ```bash
-set-trace extract-prompt /tmp/set-trace-clauses.json --source <source> --preset <preset> > /tmp/set-trace-extract-prompt.txt
+tracecart extract-prompt /tmp/tracecart-clauses.json --source <source> --preset <preset> > /tmp/tracecart-extract-prompt.txt
 ```
 
 #### 2b. Send to subagent
 
-Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-extract-prompt.txt` as the prompt. The subagent should return a JSON array of extracted traces.
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/tracecart-extract-prompt.txt` as the prompt. The subagent should return a JSON array of extracted traces.
 
-Save the subagent's full response to `/tmp/set-trace-extract-raw.txt`.
+Save the subagent's full response to `/tmp/tracecart-extract-raw.txt`.
 
 #### 2c. Validate extraction
 
 ```bash
-set-trace extract-validate /tmp/set-trace-extract-raw.txt /tmp/set-trace-clauses.json --source <source> --preset <preset> > /tmp/set-trace-traces.json
+tracecart extract-validate /tmp/tracecart-extract-raw.txt /tmp/tracecart-clauses.json --source <source> --preset <preset> > /tmp/tracecart-traces.json
 ```
 
 Report any validation errors from the output.
@@ -83,7 +83,7 @@ Report any validation errors from the output.
 #### 2d. Check remainder
 
 ```bash
-set-trace remainder /tmp/set-trace-clauses.json /tmp/set-trace-traces.json > /tmp/set-trace-remainder.json
+tracecart remainder /tmp/tracecart-clauses.json /tmp/tracecart-traces.json > /tmp/tracecart-remainder.json
 ```
 
 Read the output and check:
@@ -103,19 +103,19 @@ Report: "Extraction iteration N: coverage_pct% (remaining clauses)."
 #### 3a. Generate matching prompt
 
 ```bash
-set-trace match-prompt /tmp/set-trace-traces.json <target> --preset <preset> > /tmp/set-trace-match-prompt.txt
+tracecart match-prompt /tmp/tracecart-traces.json <target> --preset <preset> > /tmp/tracecart-match-prompt.txt
 ```
 
 #### 3b. Send to subagent
 
-Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-match-prompt.txt` as the prompt. The subagent should return a JSON array of coverage assessments.
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/tracecart-match-prompt.txt` as the prompt. The subagent should return a JSON array of coverage assessments.
 
-Save the subagent's full response to `/tmp/set-trace-match-raw.txt`.
+Save the subagent's full response to `/tmp/tracecart-match-raw.txt`.
 
 #### 3c. Validate matching
 
 ```bash
-set-trace match-validate /tmp/set-trace-match-raw.txt /tmp/set-trace-traces.json --preset <preset> > /tmp/set-trace-matches.json
+tracecart match-validate /tmp/tracecart-match-raw.txt /tmp/tracecart-traces.json --preset <preset> > /tmp/tracecart-matches.json
 ```
 
 Report any validation errors.
@@ -123,7 +123,7 @@ Report any validation errors.
 ### Step 4: Finalize
 
 ```bash
-set-trace finalize /tmp/set-trace-traces.json /tmp/set-trace-matches.json --source <source> --target <target> --output trace-map.json
+tracecart finalize /tmp/tracecart-traces.json /tmp/tracecart-matches.json --source <source> --target <target> --output trace-map.json
 ```
 
 ### Step 5: Report
@@ -144,7 +144,7 @@ Reverse tracing checks whether target claims can be traced BACK to the source �
 ### Step R1: Split target into clauses
 
 ```bash
-set-trace split <target> > /tmp/set-trace-target-clauses.json
+tracecart split <target> > /tmp/tracecart-target-clauses.json
 ```
 
 Report: "Target split: N content clauses."
@@ -154,19 +154,19 @@ Report: "Target split: N content clauses."
 #### R2a. Generate extraction prompt
 
 ```bash
-set-trace extract-prompt /tmp/set-trace-target-clauses.json --source <target> --preset <preset> > /tmp/set-trace-reverse-extract-prompt.txt
+tracecart extract-prompt /tmp/tracecart-target-clauses.json --source <target> --preset <preset> > /tmp/tracecart-reverse-extract-prompt.txt
 ```
 
 #### R2b. Send to subagent
 
-Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-reverse-extract-prompt.txt` as the prompt. The subagent should return a JSON array of extracted claims.
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/tracecart-reverse-extract-prompt.txt` as the prompt. The subagent should return a JSON array of extracted claims.
 
-Save the subagent's full response to `/tmp/set-trace-reverse-extract-raw.txt`.
+Save the subagent's full response to `/tmp/tracecart-reverse-extract-raw.txt`.
 
 #### R2c. Validate extraction (RT- prefix)
 
 ```bash
-set-trace reverse-extract-validate /tmp/set-trace-reverse-extract-raw.txt /tmp/set-trace-target-clauses.json --target <target> --preset <preset> > /tmp/set-trace-reverse-traces.json
+tracecart reverse-extract-validate /tmp/tracecart-reverse-extract-raw.txt /tmp/tracecart-target-clauses.json --target <target> --preset <preset> > /tmp/tracecart-reverse-traces.json
 ```
 
 Report any validation errors.
@@ -176,19 +176,19 @@ Report any validation errors.
 #### R3a. Generate reverse matching prompt
 
 ```bash
-set-trace reverse-match-prompt /tmp/set-trace-reverse-traces.json /tmp/set-trace-traces.json --preset <preset> > /tmp/set-trace-reverse-match-prompt.txt
+tracecart reverse-match-prompt /tmp/tracecart-reverse-traces.json /tmp/tracecart-traces.json --preset <preset> > /tmp/tracecart-reverse-match-prompt.txt
 ```
 
 #### R3b. Send to subagent
 
-Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-reverse-match-prompt.txt` as the prompt. The subagent should return a JSON array of reverse traceability assessments.
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/tracecart-reverse-match-prompt.txt` as the prompt. The subagent should return a JSON array of reverse traceability assessments.
 
-Save the subagent's full response to `/tmp/set-trace-reverse-match-raw.txt`.
+Save the subagent's full response to `/tmp/tracecart-reverse-match-raw.txt`.
 
 #### R3c. Validate reverse matching
 
 ```bash
-set-trace reverse-match-validate /tmp/set-trace-reverse-match-raw.txt /tmp/set-trace-reverse-traces.json > /tmp/set-trace-reverse-matches.json
+tracecart reverse-match-validate /tmp/tracecart-reverse-match-raw.txt /tmp/tracecart-reverse-traces.json > /tmp/tracecart-reverse-matches.json
 ```
 
 Report any validation errors.
@@ -196,7 +196,7 @@ Report any validation errors.
 ### Step R4: Finalize with reverse traces
 
 ```bash
-set-trace finalize /tmp/set-trace-traces.json /tmp/set-trace-matches.json --source <source> --target <target> --reverse-traces /tmp/set-trace-reverse-matches.json --output trace-map.json
+tracecart finalize /tmp/tracecart-traces.json /tmp/tracecart-matches.json --source <source> --target <target> --reverse-traces /tmp/tracecart-reverse-matches.json --output trace-map.json
 ```
 
 ### Step R5: Reverse report
@@ -210,7 +210,7 @@ If there are UNTRACED_IN_SOURCE claims, list the top 5 with their text and the n
 
 ## Notes
 
-- All intermediate files go to `/tmp/set-trace-*` to avoid polluting the project directory
+- All intermediate files go to `/tmp/tracecart-*` to avoid polluting the project directory
 - The extraction loop (Step 2) runs max 3 iterations and stops early if remainder doesn't shrink
 - Each subagent call is independent — the prompt contains all context the subagent needs
 - If any step fails, report the error and stop — don't continue with partial data
