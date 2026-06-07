@@ -354,6 +354,8 @@ def goto_definition(params: types.TextDocumentPositionParams):
             refs = trace.get('refs', [])
             if refs:
                 ref = refs[0]
+                if not ref.get('file') or not ref.get('line'):
+                    continue
                 target_path = Path(ref['file'])
                 if not target_path.is_absolute() and ls._trace_map_path:
                     target_path = ls._trace_map_path.parent / target_path
@@ -366,6 +368,31 @@ def goto_definition(params: types.TextDocumentPositionParams):
                         end=types.Position(line=target_line, character=0),
                     ),
                 )
+
+    for rt in tm.get('reverse_traces', []):
+        source = rt.get('source', {})
+        if ls.path_matches(filepath, source.get('file', '')) and source.get('line') == line:
+            src_trace_id = rt.get('source_trace_id') or rt.get('nearest_source_trace')
+            if not src_trace_id:
+                continue
+            for trace in tm.get('traces', []):
+                if trace.get('id') == src_trace_id:
+                    src = trace.get('source', {})
+                    if not src.get('file'):
+                        continue
+                    src_path = Path(src['file'])
+                    if not src_path.is_absolute() and ls._trace_map_path:
+                        src_path = ls._trace_map_path.parent / src_path
+                    src_uri = f"file://{src_path.resolve()}"
+                    src_line = max(src.get('line', 1) - 1, 0)
+                    return types.Location(
+                        uri=src_uri,
+                        range=types.Range(
+                            start=types.Position(line=src_line, character=0),
+                            end=types.Position(line=src_line, character=0),
+                        ),
+                    )
+
     return None
 
 
