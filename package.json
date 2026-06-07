@@ -15,7 +15,7 @@
   "homepage": "https://github.com/tatargabor/tracecart",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tatargabor/tracecart"
+    "url": "git+https://github.com/tatargabor/tracecart.git"
   },
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,7 @@
     }
   },
   "bin": {
-    "tracecart": "./dist/cli.js"
+    "tracecart": "dist/cli.js"
   },
   "files": [
     "dist",
