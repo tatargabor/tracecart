@@ -1,6 +1,33 @@
 # set-trace
 
-Claim traceability tool — extract atomic traces from source documents, verify coverage against targets, detect unsupported claims via reverse tracing.
+[![npm](https://img.shields.io/npm/v/@set-trace/cli)](https://npmjs.com/package/@set-trace/cli)
+[![license](https://img.shields.io/npm/l/@set-trace/cli)](LICENSE)
+
+[Documentation](docs/) · [npm](https://www.npmjs.com/package/@set-trace/cli)
+
+**Claim traceability tool** — extract atomic traces from source documents, verify coverage against targets, detect unsupported claims via reverse tracing.
+
+**The problem:** You have input documents (client specs, meeting notes, emails) and generated implementation specs. How do you know the specs cover everything? Manual review misses implicit requirements, compound sentences, and cross-document overrides.
+
+**set-trace** extracts atomic requirements, verifies each against your target documents, and optionally reverse-traces to catch hallucinations. Output: `trace-map.json` for editor visualization.
+
+## How it works
+
+```
+SOURCE DOCUMENTS (specs, meetings, emails)
+  │
+  ├─ Split into clauses (deterministic)
+  ├─ Extract traces (LLM, max 3 iterations)
+  ├─ Match traces against target (LLM)
+  ├─ [--reverse] Reverse trace: target → source (LLM)
+  │
+  ▼
+trace-map.json → LSP → Editor annotations (Zed, VS Code)
+```
+
+Two layers:
+- **Control layer** (deterministic TypeScript): clause splitting, validation, remainder tracking, finalization
+- **Semantic layer** (LLM via Claude Code subagents): extraction, coverage matching, reverse tracing
 
 ## Install
 
@@ -8,93 +35,96 @@ Claim traceability tool — extract atomic traces from source documents, verify 
 npm install -g @set-trace/cli
 ```
 
-## Usage
+## Quick start
 
 ### As a Claude Code skill
 
 ```bash
-# Install command into your project
+# Install commands into your project
 set-trace init
 
-# Run the full pipeline (forward)
-/set:trace source.md target.md --preset spec-coverage
+# Run forward pipeline
+/set:trace source.md target.md
 
 # Forward + reverse (detect unsupported claims in target)
 /set:trace source.md target.md --reverse
+
+# Custom preset
+/set:trace source.md target.md --preset contract-compliance
 ```
 
 ### CLI commands
 
 ```bash
-# Split source into clauses
-set-trace split source.md
-
-# Generate extraction prompt
+set-trace split source.md                          # Split into clauses
 set-trace extract-prompt clauses.json --source source.md --preset spec-coverage
-
-# Validate extraction output
-set-trace extract-validate llm_output.txt clauses.json --source source.md --preset spec-coverage
-
-# Check remainder (uncovered clauses)
-set-trace remainder clauses.json traces.json
-
-# Generate coverage matching prompt
+set-trace extract-validate output.txt clauses.json --source source.md --preset spec-coverage
+set-trace remainder clauses.json traces.json       # Check uncovered clauses
 set-trace match-prompt traces.json target.md --preset spec-coverage
-
-# Validate matching output
-set-trace match-validate llm_output.txt traces.json --preset spec-coverage
-
-# Finalize trace-map
-set-trace finalize traces.json matches.json --source source.md --target target.md --output trace-map.json
-
-# List available presets
-set-trace presets
-```
-
-## Architecture
-
-Two layers:
-- **Control layer** (deterministic TypeScript): clause splitting, validation, remainder tracking, finalization
-- **Semantic layer** (LLM via Claude Code subagents): extraction, coverage matching, reverse tracing
-
-```
-Source documents
-  → Split into clauses (deterministic)
-  → Extract traces (LLM, max 3 iterations)
-  → Match traces against target (LLM)
-  → [optional] Reverse trace: target → source (LLM)
-  → Output: trace-map.json
+set-trace match-validate output.txt traces.json --preset spec-coverage
+set-trace finalize traces.json matches.json --source source.md --target target.md -o trace-map.json
+set-trace presets                                  # List available presets
 ```
 
 ## Presets
 
-Presets define domain vocabulary (trace types, coverage statuses) and prompt templates. The default `spec-coverage` preset checks requirements coverage.
+Presets define domain vocabulary (trace types, coverage statuses) and prompt templates. Switch presets for different comparison types without code changes.
 
-Custom presets: place a JSON file in `./presets/<name>.json`.
+| Preset | Description |
+|--------|-------------|
+| `spec-coverage` (default) | Source requirements → target spec coverage |
 
-See [docs/presets.md](docs/presets.md) for details.
+Custom presets: place `./presets/<name>.json` in your project.
+
+See [docs/presets.md](docs/presets.md) for format and examples.
 
 ## Output
 
-`trace-map.json` — consumed by the LSP server for editor visualization (Zed, VS Code).
+`trace-map.json` — consumed by the LSP server for inline editor annotations.
+
+Coverage markers per trace:
+- **COVERED** — target fully addresses the requirement
+- **PARTIAL** — partially addressed, something missing
+- **MISSING** — not addressed at all
+- **DEFERRED** — explicitly out of scope
+- **N/A** — meta-statement, doesn't need coverage
 
 ## Documentation
 
-Detailed documentation is in [`docs/`](docs/):
-
-- [Presets](docs/presets.md) — preset format, customization, discovery
-- [Benchmarks](docs/benchmarks.md) — extraction method comparison and scoring
-- [Testing](docs/testing.md) — test fixtures, running tests, adding ground truth
+| Document | Description |
+|----------|-------------|
+| [Presets](docs/presets.md) | Preset format, customization, discovery |
+| [Benchmarks](docs/benchmarks.md) | Extraction method comparison and scoring |
+| [Testing](docs/testing.md) | Test fixtures, running tests, adding ground truth |
 
 ## Development
 
 ```bash
-npm run build       # Compile TypeScript
-npm run dev         # Watch mode
-npm test            # Run tests
+git clone https://github.com/tatargabor/set-trace.git
+cd set-trace
+npm install
+npm run build
+npm test
 ```
 
-Zero runtime dependencies. Node.js >= 18.
+| Command | What it does |
+|---------|-------------|
+| `npm run build` | Compile TypeScript |
+| `npm run dev` | Watch mode |
+| `npm test` | Run tests (vitest) |
+| `npm run lint` | Type-check without emit |
+| `npm run clean` | Remove dist/ |
+
+### Publishing
+
+```bash
+./scripts/publish.sh patch   # bump → build → test → npm publish → git tag → GH release
+./scripts/publish.sh minor
+./scripts/publish.sh major
+./scripts/publish.sh --dry-run patch  # preview without changes
+```
+
+Requires clean working tree, `gh` CLI, and npm auth.
 
 ## License
 

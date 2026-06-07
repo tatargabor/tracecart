@@ -2,7 +2,33 @@
   "name": "@set-trace/cli",
   "version": "0.1.0",
   "description": "Claim traceability tool — extract traces from source documents, verify coverage against targets",
+  "keywords": [
+    "traceability",
+    "requirements",
+    "coverage",
+    "specification",
+    "verification",
+    "llm",
+    "claude-code",
+    "reverse-trace"
+  ],
+  "homepage": "https://github.com/tatargabor/set-trace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tatargabor/set-trace"
+  },
+  "license": "MIT",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js"
+    }
+  },
   "bin": {
     "set-trace": "./dist/cli.js"
   },
@@ -15,17 +41,12 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "tsc --noEmit",
     "prepublishOnly": "tsc"
   },
-  "keywords": [
-    "traceability",
-    "requirements",
-    "coverage",
-    "claude-code"
-  ],
-  "license": "MIT",
   "engines": {
     "node": ">=18"
   },
