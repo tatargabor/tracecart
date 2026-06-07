@@ -51,6 +51,7 @@ from match.coverage import (
     format_reverse_prompt,
     validate_reverse_matches,
     apply_reverse_matches,
+    resolve_refs,
 )
 from output.trace_map import build_trace_map
 
@@ -194,6 +195,7 @@ def cmd_finalize(args):
             i += 1
 
     matched_traces = apply_matches(traces, matches)
+    matched_traces = resolve_refs(matched_traces, target_files)
     trace_map = build_trace_map(matched_traces, source_files, target_files, untraced, reverse_traces=reverse_traces)
 
     output_json = json.dumps(trace_map, ensure_ascii=False, indent=2)

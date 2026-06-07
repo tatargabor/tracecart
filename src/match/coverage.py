@@ -335,6 +335,48 @@ def _parse_spec_ref(ref_str: str) -> dict:
     }
 
 
+def resolve_refs(traces: list[dict], target_files: list[str]) -> list[dict]:
+    """Resolve section references to file + line number in target documents."""
+    section_index = {}
+    for tf in target_files:
+        try:
+            lines = Path(tf).read_text(encoding='utf-8').split('\n')
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if re.match(r'^#{1,4}\s+', stripped):
+                section_index[(tf, stripped)] = i + 1
+
+    for trace in traces:
+        for ref in trace.get('refs', []):
+            if ref.get('line', 0) > 0 and ref.get('file'):
+                continue
+            section = ref.get('section', '')
+            if not section:
+                continue
+            best_file = ''
+            best_line = 0
+            for (tf, header), lineno in section_index.items():
+                if _section_matches(section, header):
+                    best_file = tf
+                    best_line = lineno
+                    break
+            if best_line:
+                if not ref.get('file'):
+                    ref['file'] = best_file
+                ref['line'] = best_line
+
+    return traces
+
+
+def _section_matches(section_ref: str, header_line: str) -> bool:
+    """Check if a section reference matches a markdown header."""
+    clean_ref = section_ref.lstrip('§').strip().lower()
+    clean_header = re.sub(r'^#+\s*', '', header_line).strip().lower()
+    return clean_ref in clean_header or clean_header in clean_ref
+
+
 def _parse_json_output(raw: str) -> list | None:
     """Parse JSON from LLM output, handling common issues."""
     raw = raw.strip()
