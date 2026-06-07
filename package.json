@@ -1,0 +1,36 @@
+{
+  "name": "@set-trace/cli",
+  "version": "0.1.0",
+  "description": "Claim traceability tool — extract traces from source documents, verify coverage against targets",
+  "type": "module",
+  "bin": {
+    "set-trace": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "prompts",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "traceability",
+    "requirements",
+    "coverage",
+    "claude-code"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

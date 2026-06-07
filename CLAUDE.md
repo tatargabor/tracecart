@@ -9,7 +9,7 @@ See DESIGN.md for full architecture and rationale.
 ## Architecture (summary)
 
 Two layers:
-- **Control layer** (deterministic Python): set operations, remainder tracking, termination
+- **Control layer** (deterministic TypeScript): set operations, remainder tracking, termination
 - **Semantic layer** (LLM via Claude Code subagents): extraction, entailment, override detection
 
 Output: `trace-map.json` → consumed by LSP server for editor visualization.
@@ -17,28 +17,39 @@ Output: `trace-map.json` → consumed by LSP server for editor visualization.
 ## Project structure
 
 ```
-src/parse/          — deterministic text preprocessing
-src/extract/        — trace extraction + recursive remainder
-src/match/          — trace-target coverage matching
-src/output/         — trace-map.json generation
-src/cluster/        — topic grouping (TODO)
-src/override/       — temporal override detection (TODO)
+src/                — TypeScript source (compiled to dist/)
+  parse/            — deterministic text preprocessing
+  extract/          — trace extraction + recursive remainder
+  match/            — trace-target coverage matching
+  output/           — trace-map.json generation
+  commands/         — CLI command wrappers
+  cli.ts            — entry point
+templates/          — Claude Code command markdown (installed via set-trace init)
 lsp/                — LSP server (pygls) for editor integration
 prompts/            — LLM prompt templates (hu + en)
 benchmark/          — ground truth data (hu + en)
-archive/            — old code kept for reference (old benchmark, examples, formatters)
+archive/            — old code kept for reference (Python source, old benchmark, examples)
 openspec/           — change specifications and artifacts
 3rdparty/           — reference implementations (git-ignored)
+```
+
+## Installation
+
+```bash
+npm install -g @set-trace/cli
 ```
 
 ## Running
 
 ```bash
-# Test clause splitter
-echo "text here" | python3 src/parse/clause_split.py - --stats
+# Build from source
+npm run build
 
-# Test remainder tracker
-python3 src/extract/remainder.py clauses.json traces.json
+# Test clause splitter
+set-trace split source.md
+
+# Run from dist directly (during development)
+node dist/cli.js split source.md
 
 # LSP server (requires: pip install pygls)
 python3 lsp/server.py
@@ -46,59 +57,70 @@ python3 lsp/server.py
 
 ## Running the pipeline (agent workflow)
 
-The pipeline is orchestrated by a Claude Code agent. Each step is a subcommand of `src/run_trace.py`:
+The pipeline can be run via the Claude Code command `/set:trace`:
+
+```bash
+# Install command markdown into project
+set-trace init
+
+# Then in Claude Code:
+/set:trace source.md target.md --lang hu
+```
+
+Or manually, each step is a subcommand of `set-trace`:
 
 ```bash
 # Step 1: Split source into clauses
-python3 src/run_trace.py split source.md > clauses.json
+set-trace split source.md > clauses.json
 
 # Step 2: Generate extraction prompt (send to subagent)
-python3 src/run_trace.py extract-prompt clauses.json --source source.md --lang hu
+set-trace extract-prompt clauses.json --source source.md --lang hu
 
 # Step 3: Validate subagent extraction output
-python3 src/run_trace.py extract-validate llm_output.txt clauses.json --source source.md > traces.json
+set-trace extract-validate llm_output.txt clauses.json --source source.md > traces.json
 
 # Step 4: Check remainder (loop until complete or not shrinking, max 3 iterations)
-python3 src/run_trace.py remainder clauses.json traces.json
+set-trace remainder clauses.json traces.json
 
 # Step 5: Generate coverage matching prompt (send to subagent)
-python3 src/run_trace.py match-prompt traces.json target.md --lang hu
+set-trace match-prompt traces.json target.md --lang hu
 
 # Step 6: Validate subagent matching output
-python3 src/run_trace.py match-validate llm_output.txt traces.json > matches.json
+set-trace match-validate llm_output.txt traces.json > matches.json
 
 # Step 7: Generate trace-map.json
-python3 src/run_trace.py finalize traces.json matches.json --source source.md --target target.md --output trace-map.json
+set-trace finalize traces.json matches.json --source source.md --target target.md --output trace-map.json
 
 # Check pipeline status
-python3 src/run_trace.py status traces.json clauses.json
+set-trace status traces.json clauses.json
 
 # --- Reverse tracing (target→source) ---
 
 # Step R1: Split target into clauses (reuses same split command)
-python3 src/run_trace.py split target.md > target_clauses.json
+set-trace split target.md > target_clauses.json
 
 # Step R2: Generate extraction prompt for target (reuses extract-prompt)
-python3 src/run_trace.py extract-prompt target_clauses.json --source target.md --lang hu
+set-trace extract-prompt target_clauses.json --source target.md --lang hu
 
 # Step R3: Validate target extraction with RT- prefix
-python3 src/run_trace.py reverse-extract-validate llm_output.txt target_clauses.json --target target.md > reverse_traces.json
+set-trace reverse-extract-validate llm_output.txt target_clauses.json --target target.md > reverse_traces.json
 
 # Step R4: Generate reverse matching prompt (target claims vs source traces)
-python3 src/run_trace.py reverse-match-prompt reverse_traces.json traces.json --lang hu
+set-trace reverse-match-prompt reverse_traces.json traces.json --lang hu
 
 # Step R5: Validate reverse matching output
-python3 src/run_trace.py reverse-match-validate llm_output.txt reverse_traces.json > reverse_matches.json
+set-trace reverse-match-validate llm_output.txt reverse_traces.json > reverse_matches.json
 
 # Step R6: Finalize with both forward and reverse traces
-python3 src/run_trace.py finalize traces.json matches.json --source source.md --target target.md --reverse-traces applied_reverse.json --output trace-map.json
+set-trace finalize traces.json matches.json --source source.md --target target.md --reverse-traces applied_reverse.json --output trace-map.json
 ```
 
 The agent interleaves deterministic steps (split, remainder, finalize) with LLM subagent calls (extraction, matching). Test fixtures are in `tests/fixtures/`.
 
 ## Development conventions
 
-- Python 3.11+, no external dependencies except pygls for LSP
+- TypeScript (Node.js ≥ 18), zero runtime dependencies
+- Python only for LSP server (pygls)
 - LLM calls go through Claude Code subagents (not Anthropic SDK)
 - All deterministic code: stdin/stdout JSON, testable offline
 - Primary editor target: Zed (then VS Code)
