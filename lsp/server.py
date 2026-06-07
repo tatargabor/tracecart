@@ -347,53 +347,54 @@ def goto_definition(params: types.TextDocumentPositionParams):
 
     filepath = ls.uri_to_path(params.text_document.uri)
     line = params.position.line + 1
+    locations = []
+    seen = set()
+
+    def _make_location(file_str, target_line):
+        p = Path(file_str)
+        if not p.is_absolute() and ls._trace_map_path:
+            p = ls._trace_map_path.parent / p
+        resolved = str(p.resolve())
+        key = (resolved, target_line)
+        if key in seen:
+            return None
+        seen.add(key)
+        return types.Location(
+            uri=f"file://{resolved}",
+            range=types.Range(
+                start=types.Position(line=max(target_line - 1, 0), character=0),
+                end=types.Position(line=max(target_line - 1, 0), character=0),
+            ),
+        )
 
     for trace in tm.get('traces', []):
         source = trace.get('source', {})
         if ls.path_matches(filepath, source.get('file', '')) and source.get('line') == line:
-            refs = trace.get('refs', [])
-            if refs:
-                ref = refs[0]
-                if not ref.get('file') or not ref.get('line'):
-                    continue
-                target_path = Path(ref['file'])
-                if not target_path.is_absolute() and ls._trace_map_path:
-                    target_path = ls._trace_map_path.parent / target_path
-                target_uri = f"file://{target_path.resolve()}"
-                target_line = max(ref.get('line', 1) - 1, 0)
-                return types.Location(
-                    uri=target_uri,
-                    range=types.Range(
-                        start=types.Position(line=target_line, character=0),
-                        end=types.Position(line=target_line, character=0),
-                    ),
-                )
+            for ref in trace.get('refs', []):
+                if ref.get('file') and ref.get('line'):
+                    loc = _make_location(ref['file'], ref['line'])
+                    if loc:
+                        locations.append(loc)
 
     for rt in tm.get('reverse_traces', []):
         source = rt.get('source', {})
         if ls.path_matches(filepath, source.get('file', '')) and source.get('line') == line:
-            src_trace_id = rt.get('source_trace_id') or rt.get('nearest_source_trace')
-            if not src_trace_id:
+            src_id = rt.get('source_trace_id') or rt.get('nearest_source_trace')
+            if not src_id:
                 continue
             for trace in tm.get('traces', []):
-                if trace.get('id') == src_trace_id:
+                if trace.get('id') == src_id:
                     src = trace.get('source', {})
-                    if not src.get('file'):
-                        continue
-                    src_path = Path(src['file'])
-                    if not src_path.is_absolute() and ls._trace_map_path:
-                        src_path = ls._trace_map_path.parent / src_path
-                    src_uri = f"file://{src_path.resolve()}"
-                    src_line = max(src.get('line', 1) - 1, 0)
-                    return types.Location(
-                        uri=src_uri,
-                        range=types.Range(
-                            start=types.Position(line=src_line, character=0),
-                            end=types.Position(line=src_line, character=0),
-                        ),
-                    )
+                    if src.get('file'):
+                        loc = _make_location(src['file'], src.get('line', 1))
+                        if loc:
+                            locations.append(loc)
 
-    return None
+    if not locations:
+        return None
+    if len(locations) == 1:
+        return locations[0]
+    return locations
 
 
 @ls.feature(types.TEXT_DOCUMENT_REFERENCES)
