@@ -13,6 +13,7 @@ STRICT RULES:
 - COVERED requires the spec to address the SPECIFIC point, not just mention the topic area
 - Check modal verbs: if requirement says "küldhet" (may) but spec says "küld" (does) → PARTIAL
 - EXCLUSION-type requirements are scope boundaries — check if specs ALSO state this boundary
+- For [implicit] requirements: if the implicit claim is about HOW to implement (data model, real-time vs batch, configurability) rather than WHAT the system must do, mark N/A — specs are not required to mirror implementation assumptions
 
 SCOPE EXCLUSIONS (M2+):
 {exclusions}

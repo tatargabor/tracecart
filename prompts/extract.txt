@@ -4,12 +4,16 @@ The text has been pre-split into numbered clauses. Each clause has a clause_id (
 RULES:
 - Every clause that carries meaning must produce at least one requirement entry
 - If a clause contains multiple independent facts joined by "vagy" (or), split them
-- IMPLICIT requirements from word choice must be extracted:
-  - "B2B" → implies not end-consumer
-  - "másodlagos" → implies priority ordering
-  - "küldhet" (may) ≠ "küld" (does) → note optionality
-  - "szükség esetén" → system needs decision logic to determine when
-  - "kizárólag" → hard scope boundary
+- IMPLICIT requirements — extract ONLY when the source text LINGUISTICALLY implies them:
+  - Modal verbs: "küldhet" (may) ≠ "küld" (does) → note optionality
+  - Scope markers: "kizárólag" → hard boundary that needs enforcement
+  - Negation scope: "nem vonatkozik X-re" → exclusion boundary needs category logic
+  - Domain terms: "B2B" → implies not end-consumer
+  DO NOT extract implicit requirements based on logical inference or implementation guessing:
+  - BAD: "figyelembe veszi a raktárkészletet" → "valós idejű raktáradat szükséges" (implementation guess)
+  - BAD: "minimális rendelési mennyiség" → "konfigurálhatónak kell lennie" (logical inference)
+  - GOOD: "kizárólag FSC beszállítóktól" → "a rendszernek meg kell akadályoznia nem-FSC rendelést" (linguistic: "kizárólag" = enforcement)
+  The test: could a reader DISAGREE with the implicit requirement while agreeing with the source text? If yes, don't extract it.
 - NEGATIVE requirements: "nem lesz", "nincs szükség", "nem cél" → type: EXCLUSION
 - Keep ORIGINAL Hungarian text — do not translate
 - Tag each entry:

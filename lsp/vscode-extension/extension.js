@@ -69,7 +69,12 @@ function applyDecorations(editor) {
     const filePath = editor.document.uri.fsPath;
     const missing = [], partial = [], covered = [];
 
-    for (const trace of (traceMap.traces || [])) {
+    const allTraces = [
+        ...(traceMap.traces || []).map(t => ({ ...t, _dir: 'forward' })),
+        ...(traceMap.reverse_traces || []).map(t => ({ ...t, _dir: 'reverse' }))
+    ];
+
+    for (const trace of allTraces) {
         const src = trace.source || {};
         const srcFile = src.file || '';
         if (!srcFile || !filePath.endsWith(srcFile)) continue;
@@ -79,13 +84,20 @@ function applyDecorations(editor) {
 
         const lineText = editor.document.lineAt(line).text;
         const range = new vscode.Range(line, 0, line, lineText.length);
-        const hoverMsg = `**[${trace.status}]** ${trace.text || ''}`;
-        const decoration = { range, hoverMessage: new vscode.MarkdownString(hoverMsg) };
 
-        switch (trace.status) {
-            case 'MISSING': missing.push(decoration); break;
-            case 'PARTIAL': partial.push(decoration); break;
-            case 'COVERED': covered.push(decoration); break;
+        const status = trace.status || '';
+        const arrow = trace._dir === 'reverse' ? '←' : '→';
+        const hoverMsg = `${arrow} **[${status}]** ${trace.text || ''}`;
+        const md = new vscode.MarkdownString(hoverMsg);
+        if (trace.similarity_note) {
+            md.appendMarkdown(`\n\n_${trace.similarity_note}_`);
+        }
+        const decoration = { range, hoverMessage: md };
+
+        switch (status) {
+            case 'MISSING': case 'UNTRACED_IN_SOURCE': missing.push(decoration); break;
+            case 'PARTIAL': case 'PARTIAL_SOURCE': partial.push(decoration); break;
+            case 'COVERED': case 'TRACED': covered.push(decoration); break;
         }
     }
 

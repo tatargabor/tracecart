@@ -4,12 +4,16 @@ The text has been pre-split into numbered clauses. Each clause has a clause_id (
 RULES:
 - Every clause that carries meaning must produce at least one requirement entry
 - If a clause contains multiple independent facts joined by "or", split them
-- IMPLICIT requirements from word choice must be extracted:
-  - "B2B" → implies not end-consumer
-  - "secondary" → implies priority ordering
-  - "may send" ≠ "sends" → note optionality
-  - "when needed" → system needs decision logic to determine when
-  - "exclusively" → hard scope boundary
+- IMPLICIT requirements — extract ONLY when the source text LINGUISTICALLY implies them:
+  - Modal verbs: "may send" ≠ "sends" → note optionality
+  - Scope markers: "exclusively" → hard boundary that needs enforcement
+  - Negation scope: "does not apply to X" → exclusion boundary needs category logic
+  - Domain terms: "B2B" → implies not end-consumer
+  DO NOT extract implicit requirements based on logical inference or implementation guessing:
+  - BAD: "considers warehouse stock" → "needs real-time stock data" (implementation guess)
+  - BAD: "minimum order quantity" → "must be configurable" (logical inference)
+  - GOOD: "exclusively from FSC suppliers" → "system must block non-FSC orders" (linguistic: "exclusively" = enforcement)
+  The test: could a reader DISAGREE with the implicit requirement while agreeing with the source text? If yes, don't extract it.
 - NEGATIVE requirements: "will not", "not needed", "not a goal" → type: EXCLUSION
 - Tag each entry:
   - type: REQUIREMENT | DECISION | WISH | OPEN_QUESTION | EXCLUSION
