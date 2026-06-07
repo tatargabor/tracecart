@@ -13,6 +13,11 @@ Hungarian compound splitting rules:
 - Split enumerated lists: 'a X-t, a Y-t és a Z-t' → one clause per item
 - DO NOT split subordinate clauses (hogy, amely, ami, ha, mert)
 - DO NOT split within parenthetical remarks
+
+Example (TerraFurn spec, §9.3):
+  Input:  "A visszaigazolásnak figyelembe kell vennie a faanyag-készletet,
+           a CNC kapacitást, a felületkezelési időt és a szállítási ütemezést"
+  Output: 4 atomic clauses, one per factor
 """
 
 import json
@@ -62,11 +67,11 @@ def split_coordinated(text: str) -> list[str]:
 def split_enumerations(text: str, base_clause: str = '') -> list[str]:
     """Split enumerated items in Hungarian.
 
-    Example: "figyelembe kell vennie a készletet, a gyártási időt, a szállítási időt és a kapacitásokat"
-    → ["figyelembe kell vennie a készletet",
-       "figyelembe kell vennie a gyártási időt",
-       "figyelembe kell vennie a szállítási időt",
-       "figyelembe kell vennie a kapacitásokat"]
+    Example: "figyelembe kell vennie a faanyag-készletet, a CNC kapacitást, a felületkezelési időt és a szállítási ütemezést"
+    → ["figyelembe kell vennie a faanyag-készletet",
+       "figyelembe kell vennie a CNC kapacitást",
+       "figyelembe kell vennie a felületkezelési időt",
+       "figyelembe kell vennie a szállítási ütemezést"]
     """
     patterns = [
         (r'(figyelembe kell vennie )(a .+)', r'\1'),

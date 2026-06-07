@@ -7,3 +7,6 @@ dist/
 build/
 .venv/
 .env
+
+# 3rd party reference repos (not shipped, learning only)
+3rdparty/

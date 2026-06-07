@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Parse a specification document into chapters.
+"""Parse a structured document into chapters.
 
 Detects chapter boundaries, extracts text per chapter,
 and outputs structured JSON for downstream processing.
 
-Handles the WPC spec format where chapters appear twice:
+Handles documents where chapters appear twice:
 once in the TOC (short references) and once as full content.
 We use the LAST occurrence of each chapter number as the content start.
 """
@@ -18,7 +18,7 @@ from pathlib import Path
 def find_chapter_boundaries(lines: list[str]) -> list[dict]:
     """Find chapter start lines from the MAIN content block.
 
-    The WPC spec has 3 blocks with chapter numbering:
+    Some documents have 3 blocks with chapter numbering:
     1. TOC (consecutive headers, no content between — skip)
     2. Main content (full chapters with content — USE THIS)
     3. Condensed summary (shorter, restarts numbering — skip)
@@ -123,7 +123,7 @@ def parse_sections(text: str, chapter_num: int) -> list[dict]:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: parse_spec.py <spec_file> [chapter_number]", file=sys.stderr)
+        print("Usage: parse_document.py <document_file> [chapter_number]", file=sys.stderr)
         sys.exit(1)
 
     spec_path = Path(sys.argv[1])

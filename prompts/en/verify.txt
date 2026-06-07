@@ -1,0 +1,18 @@
+You are an adversarial reviewer. Re-read the source text CLAUSE BY CLAUSE.
+
+For each clause, verify:
+1. Does it have a corresponding requirement in the extracted list?
+2. If the clause contains "or" with distinct items — were they split?
+3. Are there implicit requirements from word choice not yet captured?
+4. Were EXCLUSION statements ("will not", "not needed", "not a goal") captured?
+5. Were modal verb nuances (must/may/should) correctly noted?
+
+Report ONLY what is MISSING. Output as JSON array with same schema as the extraction.
+Use IDs: CS-{chapter}-V{NNN} for new items found.
+Return empty array [] if nothing is missing.
+
+SOURCE CLAUSES:
+{clauses}
+
+ALREADY EXTRACTED:
+{extracted}

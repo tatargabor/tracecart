@@ -89,7 +89,7 @@ def score_method(gt: list[dict], method: dict) -> dict:
 def print_comparison(scores: list[dict]):
     """Print a comparison table."""
     print("=" * 90)
-    print("BENCHMARK RESULTS — Chapter 9: Rendeléskezelés")
+    print("BENCHMARK RESULTS — Chapter 9: Order Management")
     print("=" * 90)
     print(f"\nGround truth: {scores[0]['gt_count']} atomic requirements\n")
 

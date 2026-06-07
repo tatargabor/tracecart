@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Format requirements JSON into markdown output documents.
+"""Format extracted claims into markdown output documents.
 
 Takes structured JSON (from LLM extraction) and produces:
-- consolidated-requirements.md (requirements table)
+- consolidated-claims.md (claims table)
 - coverage-matrix.md (verification results)
 
 All formatting is deterministic — no LLM needed.
@@ -15,10 +15,10 @@ from pathlib import Path
 
 
 DOMAIN_TAGS = [
-    'orders', 'email', 'ai', 'inventory', 'manufacturing',
+    'orders', 'email', 'ai', 'materials', 'manufacturing',
     'logistics', 'communication', 'crm', 'partners', 'billing',
-    'products', 'sites', 'capacity', 'shipping', 'documents',
-    'statistics', 'portal', 'pricing',
+    'products', 'finishing', 'capacity', 'shipping', 'documents',
+    'design', 'portal', 'pricing',
 ]
 
 VALID_TYPES = ['REQUIREMENT', 'DECISION', 'WISH', 'OPEN_QUESTION', 'EXCLUSION']
@@ -71,12 +71,12 @@ def format_consolidated(requirements: list[dict], sources: dict) -> str:
     lines = [
         '---',
         f'generated: "{date.today().isoformat()}"',
-        'method: "extract-adversarial-verify (Method C)"',
+        'method: "extract-adversarial-verify (Method G)"',
         f'total_requirements: {len(requirements)}',
         f'by_type: {json.dumps(type_counts)}',
         '---',
         '',
-        '# Konszolidált Követelmények',
+        '# Consolidated Requirements',
         '',
         '## Summary',
         '',
