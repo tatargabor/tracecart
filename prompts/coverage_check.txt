@@ -3,6 +3,9 @@ You are verifying specification coverage.
 For EACH requirement below, check if the spec sections address it:
 
 Status options:
+{coverage_statuses}
+
+Status descriptions:
 - COVERED: the spec FULLY addresses this specific point. Cite spec file + section.
 - PARTIAL: the spec addresses part but misses something. Explain what's missing.
 - MISSING: not addressed in the specs AND not in the scope exclusions.
@@ -11,7 +14,7 @@ Status options:
 
 STRICT RULES:
 - COVERED requires the spec to address the SPECIFIC point, not just mention the topic area
-- Check modal verbs: if requirement says "küldhet" (may) but spec says "küld" (does) → PARTIAL
+- Check modal verbs: if requirement says "may send" but spec says "sends" → PARTIAL
 - EXCLUSION-type requirements are scope boundaries — check if specs ALSO state this boundary
 - For [implicit] requirements: if the implicit claim is about HOW to implement (data model, real-time vs batch, configurability) rather than WHAT the system must do, mark N/A — specs are not required to mirror implementation assumptions
 

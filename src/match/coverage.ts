@@ -178,7 +178,7 @@ export function batchTraces<T>(traces: T[], batchSize: number = MAX_TRACES_PER_B
   return batches;
 }
 
-export function validateMatches(rawOutput: string, traces: TraceInput[]): MatchValidationResult {
+export function validateMatches(rawOutput: string, traces: TraceInput[], validStatuses: Set<string> = VALID_STATUSES as Set<string>): MatchValidationResult {
   const errors: string[] = [];
   const matches: Match[] = [];
 
@@ -210,7 +210,7 @@ export function validateMatches(rawOutput: string, traces: TraceInput[]): MatchV
     }
 
     const status = ((rec.status as string) ?? '').toUpperCase();
-    if (!VALID_STATUSES.has(status as CoverageStatus)) {
+    if (!validStatuses.has(status)) {
       errors.push(`Entry ${i} (${sid}): invalid status "${status}"`);
       continue;
     }

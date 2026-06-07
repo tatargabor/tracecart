@@ -72,6 +72,7 @@ export function validateTraces(
   clauses: Clause[],
   sourceFile: string = '',
   idPrefix: string = 'T',
+  validTypes: Set<string> = VALID_TYPES as Set<string>,
 ): ValidationResult {
   const errors: string[] = [];
   const traces: Trace[] = [];
@@ -114,9 +115,9 @@ export function validateTraces(
     }
 
     let traceType = ((entry.type as string | undefined) ?? '').toUpperCase() as TraceType;
-    if (!VALID_TYPES.has(traceType)) {
+    if (!validTypes.has(traceType)) {
       errors.push(`Entry ${i}: invalid type "${traceType}"`);
-      traceType = 'REQUIREMENT';
+      traceType = 'REQUIREMENT' as TraceType;
     }
 
     const text = ((entry.text as string | undefined) ?? '');

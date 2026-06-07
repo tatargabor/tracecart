@@ -1,0 +1,15 @@
+{
+  "name": "spec-coverage",
+  "description": "Source requirements → target spec coverage verification",
+  "version": "1.0",
+  "trace_types": ["REQUIREMENT", "DECISION", "WISH", "OPEN_QUESTION", "EXCLUSION"],
+  "coverage_statuses": ["COVERED", "PARTIAL", "MISSING", "DEFERRED", "N/A"],
+  "prompts": {
+    "extract": "extract.txt",
+    "coverage_check": "coverage_check.txt",
+    "reverse_check": "reverse_check.txt"
+  },
+  "defaults": {
+    "language": "en"
+  }
+}

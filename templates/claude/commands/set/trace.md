@@ -1,4 +1,4 @@
-<!-- set-trace v0.1.0 -->
+<!-- set-trace v0.2.0 -->
 ---
 name: "SET: Trace"
 description: "Run the full trace pipeline: source → target → trace-map.json. Deterministic CLI steps + LLM subagent extraction and matching."
@@ -8,13 +8,38 @@ description: "Run the full trace pipeline: source → target → trace-map.json.
 
 Run the complete set-trace pipeline to extract traces from source documents and verify coverage against target documents.
 
-**Input**: `/set:trace <source> <target> [--lang hu|en]`
+**Input**: `/set:trace <source> <target> [--preset <name>]`
 
 - `<source>`: path to the source document (authoritative input, e.g., meeting notes)
 - `<target>`: path to the target document (verified for completeness, e.g., spec)
-- `--lang`: prompt language, defaults to `hu` (Hungarian). Use `en` for English.
+- `--preset`: preset name, defaults to `spec-coverage`. Run `set-trace presets` to list available presets.
 
 Parse `$ARGUMENTS` to extract these. If arguments are missing, ask the user.
+
+## Presets
+
+Presets define the domain vocabulary (trace types, coverage statuses) and prompt templates used by the pipeline. The same pipeline structure works for different use cases by switching presets.
+
+**Built-in presets:**
+- `spec-coverage` — Source requirements → target spec coverage verification (default)
+
+**Custom presets:** Place a JSON file in `./presets/<name>.json` in your project. Project-local presets override built-in ones by name.
+
+**Preset format:**
+```json
+{
+  "name": "my-preset",
+  "description": "What this preset checks",
+  "version": "1.0",
+  "trace_types": ["TYPE_A", "TYPE_B"],
+  "coverage_statuses": ["STATUS_A", "STATUS_B"],
+  "prompts": {
+    "extract": "extract.txt",
+    "coverage_check": "coverage_check.txt",
+    "reverse_check": "reverse_check.txt"
+  }
+}
+```
 
 ## Pipeline Steps
 
@@ -37,7 +62,7 @@ Set `iteration = 1` and `previous_remaining = Infinity`.
 #### 2a. Generate extraction prompt
 
 ```bash
-set-trace extract-prompt /tmp/set-trace-clauses.json --source <source> --lang <lang> > /tmp/set-trace-extract-prompt.txt
+set-trace extract-prompt /tmp/set-trace-clauses.json --source <source> --preset <preset> > /tmp/set-trace-extract-prompt.txt
 ```
 
 #### 2b. Send to subagent
@@ -49,7 +74,7 @@ Save the subagent's full response to `/tmp/set-trace-extract-raw.txt`.
 #### 2c. Validate extraction
 
 ```bash
-set-trace extract-validate /tmp/set-trace-extract-raw.txt /tmp/set-trace-clauses.json --source <source> > /tmp/set-trace-traces.json
+set-trace extract-validate /tmp/set-trace-extract-raw.txt /tmp/set-trace-clauses.json --source <source> --preset <preset> > /tmp/set-trace-traces.json
 ```
 
 Report any validation errors from the output.
@@ -77,7 +102,7 @@ Report: "Extraction iteration N: coverage_pct% (remaining clauses)."
 #### 3a. Generate matching prompt
 
 ```bash
-set-trace match-prompt /tmp/set-trace-traces.json <target> --lang <lang> > /tmp/set-trace-match-prompt.txt
+set-trace match-prompt /tmp/set-trace-traces.json <target> --preset <preset> > /tmp/set-trace-match-prompt.txt
 ```
 
 #### 3b. Send to subagent
@@ -89,7 +114,7 @@ Save the subagent's full response to `/tmp/set-trace-match-raw.txt`.
 #### 3c. Validate matching
 
 ```bash
-set-trace match-validate /tmp/set-trace-match-raw.txt /tmp/set-trace-traces.json > /tmp/set-trace-matches.json
+set-trace match-validate /tmp/set-trace-match-raw.txt /tmp/set-trace-traces.json --preset <preset> > /tmp/set-trace-matches.json
 ```
 
 Report any validation errors.

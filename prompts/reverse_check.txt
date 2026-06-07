@@ -9,7 +9,7 @@ Status options:
 
 STRICT RULES:
 - TRACED requires a source trace that supports the SPECIFIC claim, not just the topic area
-- Check modal verbs: if target says "küld" (does) but source says "küldhet" (may) → PARTIAL_SOURCE
+- Check modal verbs: if target says "sends" but source says "may send" → PARTIAL_SOURCE
 - If untraced or partial, identify the NEAREST source trace (most semantically similar) and explain the gap
 
 TARGET CLAIMS TO CHECK:
