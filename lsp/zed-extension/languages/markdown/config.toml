@@ -1,0 +1,3 @@
+[language_servers.set-trace]
+command = "python3"
+args = ["lsp/server.py"]
