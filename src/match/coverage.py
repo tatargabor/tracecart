@@ -350,7 +350,8 @@ def resolve_refs(traces: list[dict], target_files: list[str]) -> list[dict]:
 
     for trace in traces:
         for ref in trace.get('refs', []):
-            if ref.get('line', 0) > 0 and ref.get('file'):
+            file_is_real = ref.get('file', '').endswith(('.md', '.txt', '.json'))
+            if ref.get('line', 0) > 0 and file_is_real:
                 continue
             section = ref.get('section', '')
             if not section:
@@ -363,8 +364,7 @@ def resolve_refs(traces: list[dict], target_files: list[str]) -> list[dict]:
                     best_line = lineno
                     break
             if best_line:
-                if not ref.get('file'):
-                    ref['file'] = best_file
+                ref['file'] = best_file
                 ref['line'] = best_line
 
     return traces
