@@ -1,4 +1,4 @@
-<!-- set-trace v0.2.0 -->
+<!-- set-trace v0.2.1 -->
 ---
 name: "SET: Trace"
 description: "Run the full trace pipeline: source → target → trace-map.json. Deterministic CLI steps + LLM subagent extraction and matching."
@@ -8,11 +8,12 @@ description: "Run the full trace pipeline: source → target → trace-map.json.
 
 Run the complete set-trace pipeline to extract traces from source documents and verify coverage against target documents.
 
-**Input**: `/set:trace <source> <target> [--preset <name>]`
+**Input**: `/set:trace <source> <target> [--preset <name>] [--reverse]`
 
 - `<source>`: path to the source document (authoritative input, e.g., meeting notes)
 - `<target>`: path to the target document (verified for completeness, e.g., spec)
 - `--preset`: preset name, defaults to `spec-coverage`. Run `set-trace presets` to list available presets.
+- `--reverse`: also run reverse tracing (target → source) to detect unsupported claims in the target
 
 Parse `$ARGUMENTS` to extract these. If arguments are missing, ask the user.
 
@@ -134,9 +135,83 @@ Read `trace-map.json` and report the coverage summary:
 
 If there are MISSING traces, list the top 5 with their text.
 
+## Reverse Tracing (only if `--reverse` is set)
+
+If `--reverse` was NOT specified, stop here. Otherwise continue with steps R1–R5.
+
+Reverse tracing checks whether target claims can be traced BACK to the source — catching hallucinations, creative additions, or unsupported specifics in the target document.
+
+### Step R1: Split target into clauses
+
+```bash
+set-trace split <target> > /tmp/set-trace-target-clauses.json
+```
+
+Report: "Target split: N content clauses."
+
+### Step R2: Extract target claims (LLM)
+
+#### R2a. Generate extraction prompt
+
+```bash
+set-trace extract-prompt /tmp/set-trace-target-clauses.json --source <target> --preset <preset> > /tmp/set-trace-reverse-extract-prompt.txt
+```
+
+#### R2b. Send to subagent
+
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-reverse-extract-prompt.txt` as the prompt. The subagent should return a JSON array of extracted claims.
+
+Save the subagent's full response to `/tmp/set-trace-reverse-extract-raw.txt`.
+
+#### R2c. Validate extraction (RT- prefix)
+
+```bash
+set-trace reverse-extract-validate /tmp/set-trace-reverse-extract-raw.txt /tmp/set-trace-target-clauses.json --target <target> --preset <preset> > /tmp/set-trace-reverse-traces.json
+```
+
+Report any validation errors.
+
+### Step R3: Match target claims against source traces (LLM)
+
+#### R3a. Generate reverse matching prompt
+
+```bash
+set-trace reverse-match-prompt /tmp/set-trace-reverse-traces.json /tmp/set-trace-traces.json --preset <preset> > /tmp/set-trace-reverse-match-prompt.txt
+```
+
+#### R3b. Send to subagent
+
+Use the **Agent tool** to spawn a subagent with the content of `/tmp/set-trace-reverse-match-prompt.txt` as the prompt. The subagent should return a JSON array of reverse traceability assessments.
+
+Save the subagent's full response to `/tmp/set-trace-reverse-match-raw.txt`.
+
+#### R3c. Validate reverse matching
+
+```bash
+set-trace reverse-match-validate /tmp/set-trace-reverse-match-raw.txt /tmp/set-trace-reverse-traces.json > /tmp/set-trace-reverse-matches.json
+```
+
+Report any validation errors.
+
+### Step R4: Finalize with reverse traces
+
+```bash
+set-trace finalize /tmp/set-trace-traces.json /tmp/set-trace-matches.json --source <source> --target <target> --reverse-traces /tmp/set-trace-reverse-matches.json --output trace-map.json
+```
+
+### Step R5: Reverse report
+
+Read `trace-map.json` and report the reverse traceability summary:
+- Total target claims
+- TRACED / PARTIAL_SOURCE / UNTRACED_IN_SOURCE counts
+- Reverse coverage percentage
+
+If there are UNTRACED_IN_SOURCE claims, list the top 5 with their text and the nearest source trace (if any).
+
 ## Notes
 
 - All intermediate files go to `/tmp/set-trace-*` to avoid polluting the project directory
 - The extraction loop (Step 2) runs max 3 iterations and stops early if remainder doesn't shrink
 - Each subagent call is independent — the prompt contains all context the subagent needs
 - If any step fails, report the error and stop — don't continue with partial data
+- Reverse tracing (Steps R1–R5) only runs when `--reverse` is specified
