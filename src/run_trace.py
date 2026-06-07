@@ -54,6 +54,7 @@ from match.coverage import (
     resolve_refs,
 )
 from output.trace_map import build_trace_map
+from output.delta import compare as delta_compare, format_text as delta_format_text
 
 
 def cmd_split(args):
@@ -286,6 +287,21 @@ def cmd_status(args):
         print(f"  DEFERRED: {summary['deferred']}", file=sys.stderr)
 
 
+def cmd_delta(args):
+    """Compare two trace-map.json files and report changes."""
+    if len(args) < 2:
+        print("Usage: run_trace.py delta <old.json> <new.json> [--json]", file=sys.stderr)
+        sys.exit(1)
+    old_map = json.loads(Path(args[0]).read_text(encoding='utf-8'))
+    new_map = json.loads(Path(args[1]).read_text(encoding='utf-8'))
+    use_json = '--json' in args
+    delta = delta_compare(old_map, new_map)
+    if use_json:
+        json.dump(delta, sys.stdout, ensure_ascii=False, indent=2)
+    else:
+        print(delta_format_text(delta))
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__, file=sys.stderr)
@@ -306,6 +322,7 @@ def main():
         'reverse-match-validate': cmd_reverse_match_validate,
         'finalize': cmd_finalize,
         'status': cmd_status,
+        'delta': cmd_delta,
     }
 
     if cmd in commands:

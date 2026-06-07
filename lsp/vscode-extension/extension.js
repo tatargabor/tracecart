@@ -5,6 +5,7 @@ const path = require('path');
 
 let client;
 let traceMap = null;
+let statusBarItem;
 
 const DECORATIONS = {
     missing: vscode.window.createTextEditorDecorationType({
@@ -155,8 +156,28 @@ function applyDecorations(editor) {
     editor.setDecorations(DECORATIONS.covered, covered);
 }
 
+function updateStatusBar() {
+    if (!traceMap || !statusBarItem) {
+        if (statusBarItem) statusBarItem.hide();
+        return;
+    }
+    const s = traceMap.summary || {};
+    const pct = s.coverage_score_pct ?? 0;
+    const c = s.covered || 0;
+    const p = s.partial || 0;
+    const m = s.missing || 0;
+
+    let text = `set-trace: ${pct}% | ${c}✓ ${p}⚠ ${m}✗`;
+    if (s.reverse_coverage_pct !== undefined) {
+        text += ` ↔ ${s.reverse_coverage_pct}%`;
+    }
+    statusBarItem.text = text;
+    statusBarItem.show();
+}
+
 function refreshAll() {
     loadTraceMap();
+    updateStatusBar();
     for (const editor of vscode.window.visibleTextEditors) {
         applyDecorations(editor);
     }
@@ -182,6 +203,11 @@ function activate(context) {
 
     client = new LanguageClient('set-trace', 'set-trace LSP', serverOptions, clientOptions);
     client.start();
+
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
+    statusBarItem.command = 'workbench.actions.view.problems';
+    statusBarItem.tooltip = 'set-trace coverage — click to open Problems';
+    context.subscriptions.push(statusBarItem);
 
     context.subscriptions.push(
         vscode.commands.registerCommand('set-trace.goto', (uriStr, line) => {
