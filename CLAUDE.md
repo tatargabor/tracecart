@@ -72,6 +72,26 @@ python3 src/run_trace.py finalize traces.json matches.json --source source.md --
 
 # Check pipeline status
 python3 src/run_trace.py status traces.json clauses.json
+
+# --- Reverse tracing (target→source) ---
+
+# Step R1: Split target into clauses (reuses same split command)
+python3 src/run_trace.py split target.md > target_clauses.json
+
+# Step R2: Generate extraction prompt for target (reuses extract-prompt)
+python3 src/run_trace.py extract-prompt target_clauses.json --source target.md --lang hu
+
+# Step R3: Validate target extraction with RT- prefix
+python3 src/run_trace.py reverse-extract-validate llm_output.txt target_clauses.json --target target.md > reverse_traces.json
+
+# Step R4: Generate reverse matching prompt (target claims vs source traces)
+python3 src/run_trace.py reverse-match-prompt reverse_traces.json traces.json --lang hu
+
+# Step R5: Validate reverse matching output
+python3 src/run_trace.py reverse-match-validate llm_output.txt reverse_traces.json > reverse_matches.json
+
+# Step R6: Finalize with both forward and reverse traces
+python3 src/run_trace.py finalize traces.json matches.json --source source.md --target target.md --reverse-traces applied_reverse.json --output trace-map.json
 ```
 
 The agent interleaves deterministic steps (split, remainder, finalize) with LLM subagent calls (extraction, matching). Test fixtures are in `tests/fixtures/`.

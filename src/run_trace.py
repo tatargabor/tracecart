@@ -44,7 +44,14 @@ sys.path.insert(0, str(Path(__file__).parent))
 from parse.clause_split import process_document
 from extract.extract import format_prompt as extract_format_prompt, validate_traces, merge_traces
 from extract.remainder import compute_remainder, is_complete, extraction_stats
-from match.coverage import format_prompt as match_format_prompt, validate_matches, apply_matches
+from match.coverage import (
+    format_prompt as match_format_prompt,
+    validate_matches,
+    apply_matches,
+    format_reverse_prompt,
+    validate_reverse_matches,
+    apply_reverse_matches,
+)
 from output.trace_map import build_trace_map
 
 
@@ -163,6 +170,7 @@ def cmd_finalize(args):
     untraced = []
     output_path = None
 
+    reverse_traces = None
     i = 2
     while i < len(args):
         if args[i] == '--source':
@@ -178,22 +186,71 @@ def cmd_finalize(args):
             untraced_data = json.loads(Path(args[i + 1]).read_text(encoding='utf-8'))
             untraced = untraced_data.get('remainder', untraced_data) if isinstance(untraced_data, dict) else untraced_data
             i += 2
+        elif args[i] == '--reverse-traces':
+            rev_data = json.loads(Path(args[i + 1]).read_text(encoding='utf-8'))
+            reverse_traces = rev_data.get('traces', rev_data) if isinstance(rev_data, dict) else rev_data
+            i += 2
         else:
             i += 1
 
     matched_traces = apply_matches(traces, matches)
-    trace_map = build_trace_map(matched_traces, source_files, target_files, untraced)
+    trace_map = build_trace_map(matched_traces, source_files, target_files, untraced, reverse_traces=reverse_traces)
 
     output_json = json.dumps(trace_map, ensure_ascii=False, indent=2)
     if output_path:
         output_path.write_text(output_json, encoding='utf-8')
         print(f"Written to {output_path}", file=sys.stderr)
         summary = trace_map['summary']
-        print(f"Coverage: {summary['coverage_score_pct']}% "
+        print(f"Forward coverage: {summary['coverage_score_pct']}% "
               f"({summary['covered']}C/{summary['partial']}P/{summary['missing']}M/"
               f"{summary['deferred']}D)", file=sys.stderr)
+        if 'reverse_total' in summary:
+            print(f"Reverse coverage: {summary['reverse_coverage_pct']}% "
+                  f"({summary['reverse_traced']}T/{summary.get('reverse_partial_source', 0)}P/"
+                  f"{summary['reverse_untraced']}U)", file=sys.stderr)
     else:
         print(output_json)
+
+
+def cmd_reverse_extract_validate(args):
+    """Validate LLM extraction output for reverse traces (RT- prefix)."""
+    raw_output = Path(args[0]).read_text(encoding='utf-8')
+    clauses_data = json.loads(Path(args[1]).read_text(encoding='utf-8'))
+    clauses = clauses_data.get('clauses', clauses_data) if isinstance(clauses_data, dict) else clauses_data
+
+    target_file = ''
+    for i, arg in enumerate(args[2:]):
+        if arg == '--target' and i + 3 <= len(args):
+            target_file = args[i + 3]
+
+    result = validate_traces(raw_output, clauses, target_file, id_prefix='RT')
+    json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
+
+
+def cmd_reverse_match_prompt(args):
+    """Format reverse matching prompt (target claims vs source traces)."""
+    reverse_data = json.loads(Path(args[0]).read_text(encoding='utf-8'))
+    reverse_traces = reverse_data.get('traces', reverse_data) if isinstance(reverse_data, dict) else reverse_data
+    source_data = json.loads(Path(args[1]).read_text(encoding='utf-8'))
+    source_traces = source_data.get('traces', source_data) if isinstance(source_data, dict) else source_data
+
+    lang = 'hu'
+    for i, arg in enumerate(args[2:]):
+        if arg == '--lang' and i + 3 <= len(args):
+            lang = args[i + 3]
+
+    prompt = format_reverse_prompt(reverse_traces, source_traces, lang)
+    print(prompt)
+
+
+def cmd_reverse_match_validate(args):
+    """Validate LLM reverse matching output."""
+    raw_output = Path(args[0]).read_text(encoding='utf-8')
+    reverse_data = json.loads(Path(args[1]).read_text(encoding='utf-8'))
+    reverse_traces = reverse_data.get('traces', reverse_data) if isinstance(reverse_data, dict) else reverse_data
+
+    result = validate_reverse_matches(raw_output, reverse_traces)
+    json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
 
 
 def cmd_status(args):
@@ -242,6 +299,9 @@ def main():
         'remainder': cmd_remainder,
         'match-prompt': cmd_match_prompt,
         'match-validate': cmd_match_validate,
+        'reverse-extract-validate': cmd_reverse_extract_validate,
+        'reverse-match-prompt': cmd_reverse_match_prompt,
+        'reverse-match-validate': cmd_reverse_match_validate,
         'finalize': cmd_finalize,
         'status': cmd_status,
     }

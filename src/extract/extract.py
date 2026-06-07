@@ -40,7 +40,7 @@ def format_prompt(clauses: list[dict], source_file: str = '', language: str = 'h
 
     clause_lines = []
     for c in clauses:
-        if c.get('is_header'):
+        if c.get('is_header') or c.get('is_meta'):
             continue
         clause_lines.append(f"[{c['clause_id']}] {c['text']}")
 
@@ -53,13 +53,14 @@ def source_hash(filepath: str) -> str:
     return hashlib.sha256(filepath.encode('utf-8')).hexdigest()[:6]
 
 
-def validate_traces(raw_output: str, clauses: list[dict], source_file: str = '') -> dict:
+def validate_traces(raw_output: str, clauses: list[dict], source_file: str = '', id_prefix: str = 'T') -> dict:
     """Validate and normalize LLM extraction output.
 
     Args:
         raw_output: raw text from LLM subagent (should be JSON array)
         clauses: original clauses for cross-referencing
         source_file: source file path for generating trace IDs
+        id_prefix: ID prefix ('T' for forward, 'RT' for reverse)
 
     Returns:
         dict with 'traces' (valid traces) and 'errors' (validation issues)
@@ -74,7 +75,7 @@ def validate_traces(raw_output: str, clauses: list[dict], source_file: str = '')
     if not isinstance(parsed, list):
         return {'traces': [], 'errors': ['LLM output is not a JSON array']}
 
-    clause_map = {c['clause_id']: c for c in clauses if not c.get('is_header')}
+    clause_map = {c['clause_id']: c for c in clauses if not c.get('is_header') and not c.get('is_meta')}
     file_hash = source_hash(source_file)
     id_counter = {}
 
@@ -106,7 +107,7 @@ def validate_traces(raw_output: str, clauses: list[dict], source_file: str = '')
         line_num = clause['line_number'] if clause else 0
         clause_idx = clause['clause_index'] if clause else 0
 
-        base_id = f'T-{file_hash}-{line_num:03d}-{clause_idx}'
+        base_id = f'{id_prefix}-{file_hash}-{line_num:03d}-{clause_idx}'
         seq = id_counter.get(base_id, 0)
         id_counter[base_id] = seq + 1
         trace_id = base_id if seq == 0 else f'{base_id}-{seq}'

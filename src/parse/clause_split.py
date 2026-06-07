@@ -37,6 +37,14 @@ COORD_CONJUNCTIONS = [
     r'\.\s+Nem\s+',
 ]
 
+META_PATTERNS = [
+    re.compile(r'^[Ll]ásd:?\s+§', re.IGNORECASE),
+    re.compile(r'^[Ss]ee:?\s+§', re.IGNORECASE),
+    re.compile(r'^\(.{0,5}lásd', re.IGNORECASE),
+    re.compile(r'^\d+\.\s+\.{3,}'),
+    re.compile(r'^\.\.\.\s+\d+$'),
+]
+
 ENUM_PATTERN = re.compile(
     r'(?:kell vennie |figyelembe kell vennie |figyelembevétele |alapján történő )'
     r'.*?'
@@ -136,6 +144,18 @@ def process_document(text: str) -> list[dict]:
                 'clause_index': 0,
                 'original_line': stripped,
                 'is_header': True,
+            })
+            continue
+
+        if any(p.search(stripped) for p in META_PATTERNS):
+            clauses.append({
+                'clause_id': f'L{line_num}',
+                'text': stripped,
+                'line_number': line_num,
+                'clause_index': 0,
+                'original_line': stripped,
+                'is_header': False,
+                'is_meta': True,
             })
             continue
 

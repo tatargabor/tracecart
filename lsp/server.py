@@ -50,6 +50,9 @@ def status_to_severity(status: str) -> types.DiagnosticSeverity:
         'COVERED': types.DiagnosticSeverity.Hint,
         'DEFERRED': types.DiagnosticSeverity.Information,
         'SUPERSEDED': types.DiagnosticSeverity.Information,
+        'UNTRACED_IN_SOURCE': types.DiagnosticSeverity.Warning,
+        'PARTIAL_SOURCE': types.DiagnosticSeverity.Information,
+        'TRACED': types.DiagnosticSeverity.Hint,
     }.get(status, types.DiagnosticSeverity.Information)
 
 
@@ -91,6 +94,38 @@ def did_open(params: types.DidOpenTextDocumentParams):
             ),
             severity=severity,
             source="set-trace",
+            message=message,
+        ))
+
+    for rt in trace_map.get('reverse_traces', []):
+        source = rt.get('source', {})
+        if not filepath.endswith(source.get('file', '')):
+            continue
+
+        status = rt.get('status', 'UNKNOWN')
+        if status not in ('UNTRACED_IN_SOURCE', 'PARTIAL_SOURCE'):
+            continue
+
+        line = source.get('line', 1) - 1
+        col_start = source.get('col_start', 0)
+        col_end = source.get('col_end', 80)
+        severity = status_to_severity(status)
+
+        message = f"[{status}] {rt.get('text', '')}"
+        nearest = rt.get('nearest_source_trace')
+        if nearest:
+            note = rt.get('similarity_note', '')
+            message += f"\n~ nearest: {nearest}"
+            if note:
+                message += f" ({note})"
+
+        diagnostics.append(types.Diagnostic(
+            range=types.Range(
+                start=types.Position(line=line, character=col_start),
+                end=types.Position(line=line, character=col_end),
+            ),
+            severity=severity,
+            source="set-trace-reverse",
             message=message,
         ))
 

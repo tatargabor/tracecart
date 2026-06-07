@@ -235,5 +235,120 @@
     "superseded": 0,
     "coverage_score_pct": 82.5,
     "notes": "Score = (15 + 3×0.5) / (15+3+2) × 100 = 16.5/20 × 100 = 82.5%. DEFERRED excluded from denominator."
+  },
+  "reverse_traces": [
+    {
+      "clause_id": "L7-C1",
+      "text": "A megrendelés visszaigazolását követően a rendszer automatikusan elindítja az anyagszükséglet-tervezési folyamatot.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Directly backed by GT-001"
+    },
+    {
+      "clause_id": "L7-C2",
+      "text": "A tervezés figyelembe veszi az aktuális raktárkészletet, a nyitott beszerzési rendeléseket és a minimális rendelési mennyiségeket.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-002/003/004 (compound source)"
+    },
+    {
+      "clause_id": "L11",
+      "text": "Amennyiben a szükséges alapanyag nem áll rendelkezésre a raktárban, a rendszer beszerzési javaslatot készít és továbbítja a beszerzési modulnak.",
+      "expected_status": "PARTIAL_SOURCE",
+      "nearest_source_trace": "GT-005",
+      "notes": "Source says 'automatikusan beszerzési javaslatot generál' — target adds 'továbbítja a beszerzési modulnak' which is unsupported"
+    },
+    {
+      "clause_id": "L15",
+      "text": "Tölgy és bükk alapanyagok beszerzése kizárólag FSC-tanúsítvánnyal rendelkező beszállítóktól történhet.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-006"
+    },
+    {
+      "clause_id": "L21-C1",
+      "text": "A CNC gépek kapacitásának ütemezése napi bontásban történik.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-009"
+    },
+    {
+      "clause_id": "L21-C2",
+      "text": "A felületkezelési kapacitás tervezése heti szinten valósul meg.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-010"
+    },
+    {
+      "clause_id": "L21-C3",
+      "text": "Az ütemező algoritmus figyelembe veszi a futó megrendeléseket és az új megrendelések prioritását.",
+      "expected_status": "PARTIAL_SOURCE",
+      "nearest_source_trace": "GT-011",
+      "notes": "Source also mentions gépkarbantartási terveket which target omits, but the target claim itself is traced. Target rephrases but does not add. TRACED is also acceptable."
+    },
+    {
+      "clause_id": "L25-C1",
+      "text": "Sürgős megrendelés esetén a projektvezető jogosult kézi átütemezésre.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-013 (lehetősége van → jogosult: rewording, same meaning)"
+    },
+    {
+      "clause_id": "L25-C2",
+      "text": "Minden kézi beavatkozás naplózásra kerül az auditálhatóság érdekében.",
+      "expected_status": "PARTIAL_SOURCE",
+      "nearest_source_trace": "GT-014",
+      "notes": "Source says 'naplózásra kerül', target adds 'az auditálhatóság érdekében' — purpose clause not in source"
+    },
+    {
+      "clause_id": "L29",
+      "text": "Az automatikus ütemezés-optimalizálás nem része az M1 kiadásnak.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-015"
+    },
+    {
+      "clause_id": "L35-C1",
+      "text": "A késztermékeket kiszállítás előtt minőségellenőrzésnek kell alávetni.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-016"
+    },
+    {
+      "clause_id": "L35-C2",
+      "text": "A minőségellenőrzésről jegyzőkönyv készül.",
+      "expected_status": "PARTIAL_SOURCE",
+      "nearest_source_trace": "GT-017",
+      "notes": "Source says 'rendszerben kell rögzíteni', target only says 'jegyzőkönyv készül' — source is stricter"
+    },
+    {
+      "clause_id": "L35-C3",
+      "text": "Hibás termék esetén a rendszer értesítést küld a projektvezetőnek.",
+      "expected_status": "PARTIAL_SOURCE",
+      "nearest_source_trace": "GT-018",
+      "notes": "Modal verb: source says 'küldhet' (may send), target says 'küld' (sends) — target strengthens optionality to mandatory"
+    },
+    {
+      "clause_id": "L41-C1",
+      "text": "A kiszállítás időpontját egyeztetni kell a megrendelővel.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-020"
+    },
+    {
+      "clause_id": "L41-C2",
+      "text": "A rendszer szállítólevelet állít elő a kiszállításhoz.",
+      "expected_status": "TRACED",
+      "nearest_source_trace": null,
+      "notes": "Backed by GT-021"
+    }
+  ],
+  "expected_reverse_summary": {
+    "reverse_total": 15,
+    "reverse_traced": 10,
+    "reverse_partial_source": 5,
+    "reverse_untraced": 0,
+    "reverse_coverage_pct": 83.3,
+    "notes": "Score = (10 + 5×0.5) / (10+5+0) × 100 = 12.5/15 × 100 = 83.3%. No UNTRACED claims in this fixture — target is a close spec of source."
   }
 }

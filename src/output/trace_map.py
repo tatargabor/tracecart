@@ -23,6 +23,7 @@ def build_trace_map(
     target_files: list[str],
     untraced_clauses: list[dict] | None = None,
     metadata: dict | None = None,
+    reverse_traces: list[dict] | None = None,
 ) -> dict:
     """Build a trace-map.json structure.
 
@@ -33,11 +34,12 @@ def build_trace_map(
         target_files: list of target file paths
         untraced_clauses: clauses not consumed by any trace (from remainder tracker)
         metadata: optional extra metadata
+        reverse_traces: target-extracted claims with reverse traceability status
 
     Returns:
         Complete trace-map dict ready for JSON serialization.
     """
-    summary = compute_summary(traces)
+    summary = compute_summary(traces, reverse_traces)
 
     trace_map = {
         'version': TRACE_MAP_VERSION,
@@ -52,14 +54,17 @@ def build_trace_map(
         'summary': summary,
     }
 
+    if reverse_traces is not None:
+        trace_map['reverse_traces'] = reverse_traces
+
     if metadata:
         trace_map['metadata'] = metadata
 
     return trace_map
 
 
-def compute_summary(traces: list[dict]) -> dict:
-    """Compute coverage summary from traces list."""
+def compute_summary(traces: list[dict], reverse_traces: list[dict] | None = None) -> dict:
+    """Compute coverage summary from traces list, optionally including reverse stats."""
     status_counts = {}
     for trace in traces:
         status = trace.get('status', 'UNKNOWN')
@@ -73,7 +78,7 @@ def compute_summary(traces: list[dict]) -> dict:
     checkable = covered + partial + missing
     score = (covered + partial * 0.5) / checkable * 100 if checkable > 0 else 0
 
-    return {
+    summary = {
         'total': total,
         'covered': covered,
         'partial': partial,
@@ -83,6 +88,30 @@ def compute_summary(traces: list[dict]) -> dict:
         'na': status_counts.get('N/A', 0),
         'coverage_score_pct': round(score, 1),
     }
+
+    if reverse_traces is not None:
+        rev_counts = {}
+        for rt in reverse_traces:
+            st = rt.get('status', 'UNKNOWN')
+            rev_counts[st] = rev_counts.get(st, 0) + 1
+
+        rev_traced = rev_counts.get('TRACED', 0)
+        rev_partial = rev_counts.get('PARTIAL_SOURCE', 0)
+        rev_untraced = rev_counts.get('UNTRACED_IN_SOURCE', 0)
+        rev_checkable = rev_traced + rev_partial + rev_untraced
+
+        rev_score = (
+            (rev_traced + rev_partial * 0.5) / rev_checkable * 100
+            if rev_checkable > 0 else 0
+        )
+
+        summary['reverse_total'] = len(reverse_traces)
+        summary['reverse_traced'] = rev_traced
+        summary['reverse_partial_source'] = rev_partial
+        summary['reverse_untraced'] = rev_untraced
+        summary['reverse_coverage_pct'] = round(rev_score, 1)
+
+    return summary
 
 
 def build_source_annotations(traces: list[dict]) -> dict:
@@ -116,11 +145,12 @@ def build_source_annotations(traces: list[dict]) -> dict:
     return annotations
 
 
-def build_target_annotations(traces: list[dict]) -> dict:
+def build_target_annotations(traces: list[dict], reverse_traces: list[dict] | None = None) -> dict:
     """Build per-file annotation map for target documents.
 
     Returns: {filepath: [{range, trace_ids, trace_texts}]}
     Used by LSP server to publish diagnostics and references on target files.
+    Includes UNTRACED_IN_SOURCE diagnostics from reverse traces.
     """
     annotations = {}
 
@@ -142,6 +172,28 @@ def build_target_annotations(traces: list[dict]) -> dict:
                 'source': trace.get('source', {}),
             })
 
+    for rt in (reverse_traces or []):
+        if rt.get('status') not in ('UNTRACED_IN_SOURCE', 'PARTIAL_SOURCE'):
+            continue
+
+        source = rt.get('source', {})
+        filepath = source.get('file')
+        if not filepath:
+            continue
+
+        if filepath not in annotations:
+            annotations[filepath] = []
+
+        annotations[filepath].append({
+            'line': source.get('line', 0),
+            'section': '',
+            'trace_id': rt.get('id'),
+            'trace_text': rt.get('text', ''),
+            'status': rt.get('status'),
+            'nearest_source_trace': rt.get('nearest_source_trace'),
+            'similarity_note': rt.get('similarity_note', ''),
+        })
+
     return annotations
 
 
@@ -161,6 +213,7 @@ def main():
         target_files=data.get('target_files', []),
         untraced_clauses=data.get('untraced_clauses', []),
         metadata=data.get('metadata'),
+        reverse_traces=data.get('reverse_traces'),
     )
 
     output_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
