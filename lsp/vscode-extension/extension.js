@@ -61,6 +61,62 @@ function loadTraceMap() {
     } catch { traceMap = null; }
 }
 
+function resolveFilePath(fileStr) {
+    if (!fileStr) return null;
+    const ws = vscode.workspace.workspaceFolders;
+    if (!ws) return null;
+    return path.resolve(ws[0].uri.fsPath, fileStr);
+}
+
+function makeNavLink(label, fileStr, line) {
+    const resolved = resolveFilePath(fileStr);
+    if (!resolved || !line) return `${label}`;
+    const uri = vscode.Uri.file(resolved);
+    const args = encodeURIComponent(JSON.stringify([uri.toString(), line]));
+    return `[${label}](command:set-trace.goto?${args})`;
+}
+
+function buildHover(trace) {
+    const status = trace.status || '';
+    const arrow = trace._dir === 'reverse' ? '←' : '→';
+    const statusIcon = { COVERED: '✓', TRACED: '✓', PARTIAL: '⚠', PARTIAL_SOURCE: '⚠', MISSING: '✗', UNTRACED_IN_SOURCE: '✗' }[status] || '?';
+
+    let targetInfo = '';
+    if (trace._dir === 'forward') {
+        const refs = trace.refs || [];
+        for (const ref of refs) {
+            if (ref.file && ref.line) {
+                targetInfo += `\n\n${arrow} ${makeNavLink(ref.section || ref.file, ref.file, ref.line)}`;
+            } else if (ref.section) {
+                targetInfo += `\n\n${arrow} ${ref.section}`;
+            }
+        }
+    } else {
+        const srcId = trace.source_trace_id || trace.nearest_source_trace;
+        if (srcId && traceMap) {
+            for (const t of (traceMap.traces || [])) {
+                if (t.id === srcId) {
+                    const src = t.source || {};
+                    if (src.file) {
+                        targetInfo += `\n\n${arrow} ${makeNavLink('source: ' + srcId, src.file, src.line)}`;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    const md = new vscode.MarkdownString(`**${statusIcon} [${status}]** ${trace.text || ''}${targetInfo}`);
+    md.isTrusted = true;
+    if (trace.similarity_note) {
+        md.appendMarkdown(`\n\n_${trace.similarity_note}_`);
+    }
+    if (trace.notes) {
+        md.appendMarkdown(`\n\n${trace.notes}`);
+    }
+    return md;
+}
+
 function applyDecorations(editor) {
     if (!editor || editor.document.languageId !== 'markdown' || !traceMap) {
         return;
@@ -84,16 +140,9 @@ function applyDecorations(editor) {
 
         const lineText = editor.document.lineAt(line).text;
         const range = new vscode.Range(line, 0, line, lineText.length);
+        const decoration = { range, hoverMessage: buildHover(trace) };
 
         const status = trace.status || '';
-        const arrow = trace._dir === 'reverse' ? '←' : '→';
-        const hoverMsg = `${arrow} **[${status}]** ${trace.text || ''}`;
-        const md = new vscode.MarkdownString(hoverMsg);
-        if (trace.similarity_note) {
-            md.appendMarkdown(`\n\n_${trace.similarity_note}_`);
-        }
-        const decoration = { range, hoverMessage: md };
-
         switch (status) {
             case 'MISSING': case 'UNTRACED_IN_SOURCE': missing.push(decoration); break;
             case 'PARTIAL': case 'PARTIAL_SOURCE': partial.push(decoration); break;
@@ -133,6 +182,17 @@ function activate(context) {
 
     client = new LanguageClient('set-trace', 'set-trace LSP', serverOptions, clientOptions);
     client.start();
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('set-trace.goto', (uriStr, line) => {
+            const uri = vscode.Uri.parse(uriStr);
+            const pos = new vscode.Position(Math.max(line - 1, 0), 0);
+            vscode.window.showTextDocument(uri, {
+                selection: new vscode.Range(pos, pos),
+                preview: true
+            });
+        })
+    );
 
     loadTraceMap();
 
