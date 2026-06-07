@@ -1,6 +1,6 @@
 {
   "name": "@tracecart/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Claim traceability tool — extract traces from source documents, verify coverage against targets",
   "keywords": [
     "traceability",
