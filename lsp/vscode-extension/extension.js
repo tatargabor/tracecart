@@ -248,7 +248,9 @@ function updateStatusBar() {
     const p = s.partial || 0;
     const m = s.missing || 0;
 
-    const sessionLabel = filterState.activeSession === 'all' ? '' : ` [${filterState.activeSession}]`;
+    const sessionCount = Object.keys(traceMaps).length;
+    const sessionLabel = filterState.activeSession !== 'all' ? ` [${filterState.activeSession}]`
+        : sessionCount > 1 ? ` [${sessionCount}]` : '';
     let text = `set-trace${sessionLabel}: ${pct}% | ${c}✓ ${p}⚠ ${m}✗`;
 
     if (s.reverse_coverage_pct !== undefined) {
