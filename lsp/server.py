@@ -54,17 +54,14 @@ SKIP_STATUSES = {'N/A', 'TRACED'}
 
 class SetTraceServer(LanguageServer):
     def __init__(self):
-        super().__init__("set-trace-lsp", "v0.2.0")
+        super().__init__("set-trace-lsp", "v0.3.0")
         self._trace_map: dict | None = None
-        self._trace_map_path: Path | None = None
-        self._trace_map_mtime: float = 0
+        self._trace_map_paths: list[Path] = []
+        self._trace_map_mtimes: dict[str, float] = {}
         self._open_uris: set[str] = set()
         self._poll_task: asyncio.Task | None = None
 
-    def find_trace_map(self) -> Path | None:
-        if self._trace_map_path and self._trace_map_path.exists():
-            return self._trace_map_path
-
+    def _get_roots(self) -> list[Path]:
         roots = []
         try:
             ws = self.workspace
@@ -74,50 +71,59 @@ class SetTraceServer(LanguageServer):
                     roots.append(Path(uri.replace("file://", "")))
         except RuntimeError:
             pass
-
         if not roots:
             roots = [Path.cwd()]
+        return roots
 
-        for root in roots:
-            candidate = root / "trace-map.json"
-            if candidate.exists():
-                self._trace_map_path = candidate
-                return candidate
+    def find_trace_maps(self) -> list[Path]:
+        found = []
+        for root in self._get_roots():
+            for p in root.rglob("trace-map.json"):
+                if "node_modules" not in p.parts:
+                    found.append(p)
+        self._trace_map_paths = found
+        return found
 
-        return None
+    def load_trace_maps(self) -> bool:
+        paths = self.find_trace_maps()
 
-    def load_trace_map(self) -> bool:
-        path = self.find_trace_map()
-        if not path or not path.exists():
+        if not paths:
             if self._trace_map is not None:
                 self._trace_map = None
-                self._trace_map_mtime = 0
+                self._trace_map_mtimes = {}
                 return True
             return False
 
-        try:
-            mtime = path.stat().st_mtime
-        except OSError:
+        current_mtimes = {}
+        for p in paths:
+            try:
+                current_mtimes[str(p)] = p.stat().st_mtime
+            except OSError:
+                pass
+
+        if current_mtimes == self._trace_map_mtimes:
             return False
 
-        if mtime == self._trace_map_mtime:
-            return False
+        merged = {'traces': [], 'reverse_traces': []}
+        for p in paths:
+            try:
+                data = json.loads(p.read_text(encoding='utf-8'))
+                merged['traces'].extend(data.get('traces', []))
+                merged['reverse_traces'].extend(data.get('reverse_traces', []))
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning("Failed to read %s: %s", p, e)
 
-        try:
-            data = json.loads(path.read_text(encoding='utf-8'))
-            self._trace_map = data
-            self._trace_map_mtime = mtime
-            return True
-        except (json.JSONDecodeError, OSError) as e:
-            logger.warning("Failed to read trace-map.json: %s", e)
-            return False
+        self._trace_map = merged
+        self._trace_map_mtimes = current_mtimes
+        return True
 
     def is_stale(self, filepath: str) -> bool:
-        if not self._trace_map_path:
+        if not self._trace_map_mtimes:
             return False
         try:
             source_mtime = os.path.getmtime(filepath)
-            return source_mtime > self._trace_map_mtime
+            latest_tm = max(self._trace_map_mtimes.values()) if self._trace_map_mtimes else 0
+            return source_mtime > latest_tm
         except OSError:
             return False
 
@@ -280,6 +286,19 @@ class SetTraceServer(LanguageServer):
 
         return lenses
 
+    def _resolve_trace_path(self, file_str: str) -> Path:
+        p = Path(file_str)
+        if p.is_absolute():
+            return p
+        for tm_path in self._trace_map_paths:
+            candidate = tm_path.parent / p
+            if candidate.exists():
+                return candidate.resolve()
+        roots = self._get_roots()
+        if roots:
+            return (roots[0] / p).resolve()
+        return p.resolve()
+
     def _find_section_line(self, filepath: str, trace_line: int) -> int:
         try:
             text = Path(filepath).read_text(encoding='utf-8')
@@ -304,16 +323,16 @@ ls = SetTraceServer()
 
 @ls.feature(types.INITIALIZED)
 def on_initialized(params):
-    ls.load_trace_map()
+    ls.load_trace_maps()
     loop = asyncio.get_event_loop()
-    ls._poll_task = loop.create_task(_poll_trace_map())
+    ls._poll_task = loop.create_task(_poll_trace_maps())
 
 
-async def _poll_trace_map():
+async def _poll_trace_maps():
     while True:
         await asyncio.sleep(POLL_INTERVAL)
         try:
-            changed = ls.load_trace_map()
+            changed = ls.load_trace_maps()
             if changed:
                 logger.info("trace-map.json changed, refreshing diagnostics")
                 ls.publish_all_open()
@@ -325,7 +344,7 @@ async def _poll_trace_map():
 def did_open(params: types.DidOpenTextDocumentParams):
     uri = params.text_document.uri
     ls._open_uris.add(uri)
-    ls.load_trace_map()
+    ls.load_trace_maps()
     ls.publish_for_uri(uri)
 
 
@@ -351,10 +370,7 @@ def goto_definition(params: types.TextDocumentPositionParams):
     seen = set()
 
     def _make_location(file_str, target_line):
-        p = Path(file_str)
-        if not p.is_absolute() and ls._trace_map_path:
-            p = ls._trace_map_path.parent / p
-        resolved = str(p.resolve())
+        resolved = str(ls._resolve_trace_path(file_str))
         key = (resolved, target_line)
         if key in seen:
             return None
@@ -411,10 +427,8 @@ def find_references(params: types.ReferenceParams):
         for ref in trace.get('refs', []):
             if ls.path_matches(filepath, ref.get('file', '')) and ref.get('line') == line:
                 source = trace.get('source', {})
-                source_path = Path(source['file'])
-                if not source_path.is_absolute() and ls._trace_map_path:
-                    source_path = ls._trace_map_path.parent / source_path
-                source_uri = f"file://{source_path.resolve()}"
+                source_path = ls._resolve_trace_path(source['file'])
+                source_uri = f"file://{source_path}"
                 source_line = max(source.get('line', 1) - 1, 0)
                 locations.append(types.Location(
                     uri=source_uri,

@@ -2,10 +2,10 @@
   "name": "set-trace-lsp",
   "displayName": "set-trace",
   "description": "Claim traceability visualization for source documents",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "engines": { "vscode": "^1.75.0" },
   "categories": ["Linters"],
-  "activationEvents": ["onLanguage:markdown"],
+  "activationEvents": ["workspaceContains:**/trace-map.json"],
   "main": "./extension.js",
   "contributes": {
     "configuration": {
@@ -17,7 +17,32 @@
           "description": "Path to python3 with pygls installed"
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "set-trace.toggleVisualization",
+        "title": "set-trace: Toggle Visualization"
+      },
+      {
+        "command": "set-trace.toggleCovered",
+        "title": "set-trace: Toggle Covered"
+      },
+      {
+        "command": "set-trace.toggleDirection",
+        "title": "set-trace: Toggle Direction"
+      },
+      {
+        "command": "set-trace.selectSession",
+        "title": "set-trace: Select Session"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "set-trace.toggleVisualization",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t"
+      }
+    ]
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"

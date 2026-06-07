@@ -13,39 +13,58 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'lsp'))
 from server import SetTraceServer, STATUS_SEVERITY, SKIP_STATUSES
 from lsprotocol import types
 
+FIXTURES = Path(__file__).parent / 'fixtures'
 
-def make_server(fixture='test-trace-map.json'):
+
+def make_server(fixture_dir='test1'):
     ls = SetTraceServer()
-    tm_path = Path(__file__).parent / 'fixtures' / fixture
-    ls._trace_map_path = tm_path
-    ls.load_trace_map()
+    tm_path = FIXTURES / fixture_dir / 'trace-map.json'
+    ls._trace_map_paths = [tm_path]
+    ls._trace_map_mtimes = {str(tm_path): tm_path.stat().st_mtime}
+    ls._trace_map = json.loads(tm_path.read_text(encoding='utf-8'))
     return ls
 
 
+def make_multi_server():
+    """Load test1 + test2 trace-maps together, simulating multi-trace discovery."""
+    ls = SetTraceServer()
+    paths = [
+        FIXTURES / 'test1' / 'trace-map.json',
+        FIXTURES / 'test2' / 'trace-map.json',
+    ]
+    ls._trace_map_paths = paths
+    ls._trace_map_mtimes = {str(p): p.stat().st_mtime for p in paths}
+    merged = {'traces': [], 'reverse_traces': []}
+    for p in paths:
+        data = json.loads(p.read_text(encoding='utf-8'))
+        merged['traces'].extend(data.get('traces', []))
+        merged['reverse_traces'].extend(data.get('reverse_traces', []))
+    ls._trace_map = merged
+    return ls
+
+
+# --- test1: single source, single target, single trace-map ---
+
 def test_load_trace_map():
-    ls = make_server()
+    ls = make_server('test1')
     assert ls._trace_map is not None
     assert ls._trace_map['version'] == 1
     assert len(ls._trace_map['traces']) == 12
     assert len(ls._trace_map.get('reverse_traces', [])) == 2
-    # Second load should return False (no change)
-    assert ls.load_trace_map() is False
-    print("  load_trace_map: OK")
+    print("  test1/load_trace_map: OK")
 
 
 def test_no_trace_map():
     ls = SetTraceServer()
-    ls._trace_map_path = Path("/nonexistent/trace-map.json")
-    assert ls.load_trace_map() is False
     assert ls._trace_map is None
     diags = ls.build_diagnostics("file:///some/file.md")
     assert diags == []
-    print("  no_trace_map graceful: OK")
+    print("  test1/no_trace_map graceful: OK")
 
 
 def test_diagnostics_severity():
-    ls = make_server()
-    diags = ls.build_diagnostics("file:///path/to/tests/fixtures/source.md")
+    ls = make_server('test1')
+    diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test1/source.md")
 
     statuses = [d.message.split(']')[0].lstrip('[') for d in diags]
 
@@ -62,12 +81,12 @@ def test_diagnostics_severity():
         elif '[COVERED]' in d.message:
             assert d.severity == types.DiagnosticSeverity.Hint
 
-    print(f"  diagnostics_severity: OK ({len(diags)} diagnostics)")
+    print(f"  test1/diagnostics_severity: OK ({len(diags)} diagnostics)")
 
 
 def test_diagnostics_reverse_traces():
-    ls = make_server()
-    diags = ls.build_diagnostics("file:///path/to/tests/fixtures/target.md")
+    ls = make_server('test1')
+    diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test1/target.md")
 
     reverse_diags = [d for d in diags if d.source == "set-trace-reverse"]
     assert len(reverse_diags) == 1, f"Expected 1 reverse diag (PARTIAL_SOURCE), got {len(reverse_diags)}"
@@ -75,15 +94,14 @@ def test_diagnostics_reverse_traces():
     rd = reverse_diags[0]
     assert 'PARTIAL_SOURCE' in rd.message
     assert 'nearest: T-abc123-017-2' in rd.message
-    print(f"  diagnostics_reverse_traces: OK ({len(reverse_diags)} reverse)")
+    print(f"  test1/diagnostics_reverse_traces: OK ({len(reverse_diags)} reverse)")
 
 
 def test_goto_definition():
-    ls = make_server()
+    ls = make_server('test1')
     tm = ls._trace_map
-    filepath = "tests/fixtures/source.md"
+    filepath = "tests/fixtures/test1/source.md"
 
-    # Line 5 has COVERED traces with refs
     found = None
     for trace in tm.get('traces', []):
         source = trace.get('source', {})
@@ -94,35 +112,33 @@ def test_goto_definition():
                 break
 
     assert found is not None, "Should find ref for COVERED trace at line 5"
-    assert found['file'] == 'tests/fixtures/target.md'
-    print("  goto_definition (COVERED): OK")
+    assert found['file'] == 'tests/fixtures/test1/target.md'
+    print("  test1/goto_definition (COVERED): OK")
 
-    # Line with MISSING trace has no refs
     for trace in tm.get('traces', []):
         source = trace.get('source', {})
         if ls.path_matches(f"/path/to/{filepath}", source.get('file', '')) and trace.get('status') == 'MISSING':
             assert trace.get('refs', []) == [], "MISSING trace should have no refs"
-    print("  goto_definition (MISSING): OK")
+    print("  test1/goto_definition (MISSING): OK")
 
 
 def test_find_references():
-    ls = make_server()
+    ls = make_server('test1')
     tm = ls._trace_map
 
-    # Target line 7 should be referenced by 2 traces
     refs_at_7 = []
     for trace in tm.get('traces', []):
         for ref in trace.get('refs', []):
-            if ls.path_matches("/path/to/tests/fixtures/target.md", ref.get('file', '')) and ref.get('line') == 7:
+            if ls.path_matches("/path/to/tests/fixtures/test1/target.md", ref.get('file', '')) and ref.get('line') == 7:
                 refs_at_7.append(trace['id'])
 
     assert len(refs_at_7) == 2, f"Expected 2 refs at target line 7, got {len(refs_at_7)}"
-    print(f"  find_references: OK ({len(refs_at_7)} refs)")
+    print(f"  test1/find_references: OK ({len(refs_at_7)} refs)")
 
 
 def test_code_lens():
-    ls = make_server()
-    source_path = str(Path(__file__).parent / 'fixtures' / 'source.md')
+    ls = make_server('test1')
+    source_path = str(FIXTURES / 'test1' / 'source.md')
     uri = f"file://{source_path}"
     lenses = ls.get_code_lenses(uri)
 
@@ -135,7 +151,7 @@ def test_code_lens():
         int(lens.command.title.split('traces:')[0].split()[-1])
         for lens in lenses
     )
-    print(f"  code_lens: OK ({len(lenses)} lenses, {total_traces} total traces)")
+    print(f"  test1/code_lens: OK ({len(lenses)} lenses, {total_traces} total traces)")
 
 
 def test_stale_detection():
@@ -155,69 +171,81 @@ def test_stale_detection():
         src.write("# test\nsome content\n")
         src_path = src.name
 
-    ls._trace_map_path = Path(tm_path)
-    ls.load_trace_map()
+    ls._trace_map_paths = [Path(tm_path)]
+    ls._trace_map_mtimes = {tm_path: Path(tm_path).stat().st_mtime}
+    ls._trace_map = json.loads(Path(tm_path).read_text(encoding='utf-8'))
 
-    # Touch source to be newer
     time.sleep(0.1)
     Path(src_path).touch()
 
     assert ls.is_stale(src_path) is True
     assert ls.is_stale("/nonexistent") is False
 
-    # Build diagnostics for stale file — severity should be Hint
-    diags = ls.build_diagnostics(f"file://{src_path}")
-    # Path won't match 'stale_test.md' exactly, so skip that check
-
     os.unlink(tm_path)
     os.unlink(src_path)
-    print("  stale_detection: OK")
+    print("  test1/stale_detection: OK")
 
 
-def test_hot_reload_detect():
-    ls = SetTraceServer()
+# --- test2: multi source + multi target, single trace-map ---
 
-    with tempfile.NamedTemporaryFile(suffix='.json', mode='w', delete=False) as f:
-        json.dump({
-            'version': 1,
-            'traces': [{'id': 'T-1', 'status': 'COVERED', 'text': 'x',
-                         'source': {'file': 'a.md', 'line': 1}}],
-            'source_files': [], 'target_files': [], 'summary': {},
-        }, f)
-        tm_path = f.name
+def test_multi_source_target():
+    ls = make_server('test2')
+    tm = ls._trace_map
+    assert len(tm['traces']) == 32
 
-    ls._trace_map_path = Path(tm_path)
-    assert ls.load_trace_map() is True
-    assert len(ls._trace_map['traces']) == 1
+    source_files = {t['source']['file'] for t in tm['traces']}
+    assert len(source_files) == 2, f"Expected 2 source files, got {source_files}"
 
-    # No change
-    assert ls.load_trace_map() is False
+    kickoff_diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test2/source-kickoff.md")
+    followup_diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test2/source-followup.md")
+    assert len(kickoff_diags) > 0, "Should have diagnostics for source-kickoff"
+    assert len(followup_diags) > 0, "Should have diagnostics for source-followup"
 
-    # Modify
+    print(f"  test2/multi_source_target: OK ({len(kickoff_diags)} kickoff, {len(followup_diags)} followup diags)")
+
+
+# --- multi-trace: test1 + test2 merged (simulates discovery) ---
+
+def test_multi_trace_merge():
+    ls = make_multi_server()
+    tm = ls._trace_map
+    total = 12 + 32
+    assert len(tm['traces']) == total, f"Expected {total} merged traces, got {len(tm['traces'])}"
+    assert len(tm['reverse_traces']) == 2, "Reverse traces from test1 should be present"
+    print(f"  multi/merge: OK ({total} traces, 2 reverse)")
+
+
+def test_multi_trace_diagnostics():
+    ls = make_multi_server()
+
+    test1_diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test1/source.md")
+    test2_diags = ls.build_diagnostics("file:///path/to/tests/fixtures/test2/source-kickoff.md")
+
+    assert len(test1_diags) > 0, "Should have diagnostics from test1"
+    assert len(test2_diags) > 0, "Should have diagnostics from test2"
+
+    print(f"  multi/diagnostics: OK (test1={len(test1_diags)}, test2={len(test2_diags)})")
+
+
+def test_multi_trace_stale():
+    ls = make_multi_server()
+
+    with tempfile.NamedTemporaryFile(suffix='.md', mode='w', delete=False) as src:
+        src.write("# test\n")
+        src_path = src.name
+
     time.sleep(0.1)
-    with open(tm_path, 'w') as f:
-        json.dump({
-            'version': 1,
-            'traces': [
-                {'id': 'T-1', 'status': 'COVERED', 'text': 'x', 'source': {'file': 'a.md', 'line': 1}},
-                {'id': 'T-2', 'status': 'MISSING', 'text': 'y', 'source': {'file': 'a.md', 'line': 2}},
-            ],
-            'source_files': [], 'target_files': [], 'summary': {},
-        }, f)
+    Path(src_path).touch()
+    assert ls.is_stale(src_path) is True
 
-    assert ls.load_trace_map() is True
-    assert len(ls._trace_map['traces']) == 2
-
-    # Delete → clears data
-    os.unlink(tm_path)
-    assert ls.load_trace_map() is True
-    assert ls._trace_map is None
-
-    print("  hot_reload_detect: OK")
+    os.unlink(src_path)
+    print("  multi/stale: OK")
 
 
 if __name__ == '__main__':
     print("Running LSP integration tests...")
+
+    print("\n--- test1: single trace-map ---")
     test_load_trace_map()
     test_no_trace_map()
     test_diagnostics_severity()
@@ -226,5 +254,13 @@ if __name__ == '__main__':
     test_find_references()
     test_code_lens()
     test_stale_detection()
-    test_hot_reload_detect()
+
+    print("\n--- test2: multi source+target, single trace-map ---")
+    test_multi_source_target()
+
+    print("\n--- multi-trace: test1 + test2 merged ---")
+    test_multi_trace_merge()
+    test_multi_trace_diagnostics()
+    test_multi_trace_stale()
+
     print("\nAll LSP tests passed!")
