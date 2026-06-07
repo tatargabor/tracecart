@@ -39,6 +39,9 @@ if [[ -z "$BUMP_TYPE" ]]; then
   echo "Usage: ./scripts/publish.sh [--dry-run] <major|minor|patch>"
   echo ""
   echo "Current version: $(current_version)"
+  echo ""
+  echo "Flow: bump version -> build -> test -> commit -> tag -> push -> GH release"
+  echo "npm publish runs automatically via GitHub Actions on release."
   exit 1
 fi
 
@@ -55,7 +58,8 @@ NEW_VERSION="$(bump_version "$OLD_VERSION" "$BUMP_TYPE")"
 info "Bumping $OLD_VERSION -> $NEW_VERSION"
 
 if [[ "$DRY_RUN" == true ]]; then
-  info "[DRY RUN] Would: bump version, build, publish, tag v$NEW_VERSION, create GitHub release."
+  info "[DRY RUN] Would: bump version, build, test, commit, tag v$NEW_VERSION, push, create GitHub release."
+  info "[DRY RUN] npm publish runs via GitHub Actions when the release is created."
   exit 0
 fi
 
@@ -74,12 +78,7 @@ info "Build complete"
 npm test
 info "Tests passed"
 
-# --- Publish ---
-
-npm publish --access public
-info "Published @tracecart/cli@$NEW_VERSION to npm"
-
-# --- Git tag + commit ---
+# --- Git commit + tag + push ---
 
 git add package.json
 git commit -m "v$NEW_VERSION"
@@ -87,14 +86,14 @@ git tag "v$NEW_VERSION"
 git push && git push --tags
 info "Tagged v$NEW_VERSION and pushed"
 
-# --- GitHub release ---
+# --- GitHub release (triggers npm publish via Actions) ---
 
 gh release create "v$NEW_VERSION" \
   --title "v$NEW_VERSION" \
   --generate-notes
-info "GitHub release created"
+info "GitHub release created — npm publish will run via GitHub Actions"
 
 echo ""
-echo "Published @tracecart/cli@$NEW_VERSION"
-echo "  npm: https://www.npmjs.com/package/@tracecart/cli"
+echo "Release v$NEW_VERSION created"
 echo "  gh:  https://github.com/tatargabor/tracecart/releases/tag/v$NEW_VERSION"
+echo "  npm: publishing via GitHub Actions (check Actions tab for status)"
